@@ -9,7 +9,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { currentUser } = useAuth();
+  const [quantity, setQuantity] = useState(1);
+  const { currentUser, isAuthenticated, hasRole } = useAuth();
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -38,169 +39,230 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product);
-      alert("Produit ajouté au panier !");
+      // Ajouter la quantité spécifiée
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product);
+      }
+
+      // Feedback visuel
+      setMessage({
+        type: "success",
+        text: `Produit ajouté au panier (x${quantity}) !`,
+      });
+      setQuantity(1); // Réinitialiser la quantité
     }
   };
 
+  const handleQuantityChange = (change) => {
+    const newQuantity = quantity + change;
+    if (newQuantity >= 1 && newQuantity <= (product?.stock || 10)) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  const [message, setMessage] = useState({ type: "", text: "" });
+
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="text-center">Chargement du produit...</div>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Chargement du produit...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
+      <div className="error-container">
+        <div className="error-content">
+          <div className="error-icon">❌</div>
+          <h2>Erreur</h2>
+          <p>{error}</p>
+          <Link to="/products" className="btn-primary">
+            ← Retour aux produits
+          </Link>
         </div>
-        <Link to="/products" className="btn btn-primary mt-4">
-          ← Retour aux produits
-        </Link>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="p-6">
-        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
-          Produit introuvable
+      <div className="not-found-container">
+        <div className="not-found-content">
+          <div className="not-found-icon">🔍</div>
+          <h2>Produit introuvable</h2>
+          <p>Le produit que vous recherchez n'existe pas ou a été supprimé.</p>
+          <Link to="/products" className="btn-primary">
+            ← Retour aux produits
+          </Link>
         </div>
-        <Link to="/products" className="btn btn-primary mt-4">
-          ← Retour aux produits
-        </Link>
       </div>
     );
   }
 
   const imageUrl =
     product.image ||
-    "https://via.placeholder.com/500x300?text=Produit+Agricole";
+    "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="product-detail-container">
       {/* Fil d'Ariane */}
-      <nav className="mb-6">
-        <Link to="/" className="text-green-600 hover:underline">
+      <nav className="breadcrumb">
+        <Link to="/" className="breadcrumb-link">
           Accueil
         </Link>
-        <span className="mx-2">/</span>
-        <Link to="/products" className="text-green-600 hover:underline">
+        <span className="breadcrumb-separator">/</span>
+        <Link to="/products" className="breadcrumb-link">
           Produits
         </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-500">{product.title}</span>
+        <span className="breadcrumb-separator">/</span>
+        <span className="breadcrumb-current">{product.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Image du produit */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={product.title}
-            className="w-full h-96 object-cover"
-          />
+      {message.text && (
+        <div className={`message ${message.type}`}>
+          {message.type === "success" ? "✅" : "❌"} {message.text}
+        </div>
+      )}
+
+      <div className="product-detail-grid">
+        {/* Galerie d'images */}
+        <div className="product-gallery">
+          <div className="main-image">
+            <img
+              src={imageUrl}
+              alt={product.title}
+              className="product-image"
+              onError={(e) => {
+                e.target.src =
+                  "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
+              }}
+            />
+          </div>
+          {product.available && (
+            <div className="availability-badge available">✓ En stock</div>
+          )}
         </div>
 
-        {/* Informations du produit */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+        {/* Informations principales */}
+        <div className="product-info">
+          <div className="product-header">
+            <h1 className="product-title">{product.title}</h1>
+            <div className="product-category">{product.category}</div>
+          </div>
 
-          <div className="mb-4">
-            <span className="text-2xl font-bold text-green-600">
-              {product.price}€
-            </span>
+          <div className="product-price">
+            <span className="price-amount">{product.price}€</span>
             {product.unit && (
-              <span className="text-gray-600 ml-2">/ {product.unit}</span>
+              <span className="price-unit">/{product.unit}</span>
             )}
           </div>
 
-          <div className="mb-4">
-            <span className="bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-full">
-              {product.category}
-            </span>
-            {product.available && (
-              <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full ml-2">
-                ✓ En stock
-              </span>
-            )}
+          <div className="product-description">
+            <h3>Description</h3>
+            <p>{product.description}</p>
           </div>
 
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Description</h2>
-            <p className="text-gray-700 leading-relaxed">
-              {product.description}
-            </p>
-          </div>
-
-          {/* Informations du vendeur */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold mb-2">Informations du vendeur</h3>
-            <p className="text-gray-700">
-              <strong>Nom :</strong> {product.sellerName}
-            </p>
-            {product.farmName && (
-              <p className="text-gray-700">
-                <strong>Exploitation :</strong> {product.farmName}
-              </p>
-            )}
-          </div>
-
-          {/* Détails supplémentaires */}
-          <div className="mb-6 grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <strong>Référence :</strong> #{product.id}
-            </div>
-            {product.stock && (
-              <div>
-                <strong>Stock disponible :</strong> {product.stock}{" "}
-                {product.unit}
+          {/* Sélecteur de quantité */}
+          {isAuthenticated() && hasRole("user") && product.available && (
+            <div className="quantity-selector">
+              <label htmlFor="quantity">Quantité :</label>
+              <div className="quantity-controls">
+                <button
+                  onClick={() => handleQuantityChange(-1)}
+                  className="quantity-btn"
+                  disabled={quantity <= 1}
+                >
+                  −
+                </button>
+                <span className="quantity-display">{quantity}</span>
+                <button
+                  onClick={() => handleQuantityChange(1)}
+                  className="quantity-btn"
+                  disabled={quantity >= (product.stock || 10)}
+                >
+                  +
+                </button>
               </div>
-            )}
-            <div>
-              <strong>Ajouté le :</strong>{" "}
-              {new Date(product.createdAt).toLocaleDateString("fr-FR")}
+              {product.stock && (
+                <span className="stock-info">{product.stock} disponibles</span>
+              )}
             </div>
-          </div>
+          )}
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {currentUser && currentUser.role === "user" && (
-              <button
-                onClick={handleAddToCart}
-                className="btn btn-primary flex-1 py-3 text-lg"
-                disabled={!product.available}
-              >
-                🛒 Ajouter au panier
+          <div className="product-actions">
+            {isAuthenticated() && hasRole("user") && product.available ? (
+              <button onClick={handleAddToCart} className="add-to-cart-btn">
+                🛒 Ajouter au panier {quantity > 1 && `(x${quantity})`}
               </button>
-            )}
-
-            {(!currentUser || currentUser.role !== "user") && (
-              <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 p-3 rounded text-center">
-                {!currentUser
-                  ? "Connectez-vous pour ajouter au panier"
-                  : "Seuls les clients peuvent acheter des produits"}
+            ) : (
+              <div className="purchase-info">
+                {!isAuthenticated() ? (
+                  <>
+                    <p>🔒 Connectez-vous pour ajouter ce produit au panier</p>
+                    <Link to="/login" className="login-link">
+                      Se connecter
+                    </Link>
+                  </>
+                ) : !hasRole("user") ? (
+                  <p>👨‍🌾 Seuls les clients peuvent acheter des produits</p>
+                ) : (
+                  <p>❌ Produit temporairement indisponible</p>
+                )}
               </div>
             )}
 
-            <Link
-              to="/products"
-              className="btn btn-secondary py-3 text-lg text-center"
-            >
+            <Link to="/products" className="back-link">
               ← Retour aux produits
             </Link>
+          </div>
+
+          {/* Informations supplémentaires */}
+          <div className="product-details">
+            <div className="detail-item">
+              <span className="detail-label">📦 Référence :</span>
+              <span className="detail-value">#{product.id}</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">📅 Ajouté le :</span>
+              <span className="detail-value">
+                {new Date(product.createdAt).toLocaleDateString("fr-FR")}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Produits similaires (optionnel) */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6">Produits similaires</h2>
-        {/* Vous pourriez ajouter une fonction pour trouver des produits similaires */}
+      {/* Informations du vendeur */}
+      <div className="seller-info">
+        <h3>👨‍🌾 Informations du vendeur</h3>
+        <div className="seller-details">
+          <div className="seller-name">
+            <strong>Nom :</strong> {product.sellerName}
+          </div>
+          {product.farmName && (
+            <div className="seller-farm">
+              <strong>Exploitation :</strong> {product.farmName}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Section produits similaires */}
+      <div className="related-products">
+        <h2>🛍️ Produits similaires</h2>
+        <p>Découvrez d'autres produits qui pourraient vous intéresser</p>
+        <div className="related-grid">
+          {/* Ici vous pourriez ajouter des produits similaires */}
+          <div className="related-placeholder">
+            <p>Aucun produit similaire pour le moment</p>
+            <Link to="/products" className="btn-secondary">
+              Voir tous les produits
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

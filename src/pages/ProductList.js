@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { productService } from "../services/productService";
 import initialProducts from "../data/products.json";
@@ -6,90 +7,171 @@ import initialProducts from "../data/products.json";
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   useEffect(() => {
-    debugData();
     loadProducts();
   }, []);
-
-  // FONCTION DE DIAGNOSTIC
-  const debugData = () => {
-    console.log("=== DIAGNOSTIC DES DONNÉES ===");
-
-    // Vérifier les données initiales
-    console.log("Données initiales (JSON):", initialProducts);
-    console.log("Nombre dans JSON:", initialProducts.length);
-
-    // Vérifier le localStorage
-    const storedProducts = localStorage.getItem("agriecom_products");
-    console.log("Données dans localStorage:", storedProducts);
-
-    if (storedProducts) {
-      const parsed = JSON.parse(storedProducts);
-      console.log("Nombre dans localStorage:", parsed.length);
-      console.log("Détail des produits:", parsed);
-    }
-
-    // Vérifier le service
-    const serviceProducts = productService.getProducts();
-    console.log("Produits du service:", serviceProducts);
-    console.log("Nombre du service:", serviceProducts.length);
-
-    console.log("=== FIN DIAGNOSTIC ===");
-  };
 
   const loadProducts = () => {
     setLoading(true);
 
     let productsData = productService.getProducts();
-    console.log("Produits à afficher:", productsData);
 
-    // SI AUCUN PRODUIT, FORCER L'INITIALISATION
-    if (productsData.length === 0) {
-      console.log("Aucun produit trouvé, initialisation...");
-      productService.saveProducts(initialProducts);
-      productsData = initialProducts;
+    // Appliquer les filtres si présents
+    if (searchTerm || selectedCategory) {
+      productsData = productService.searchProducts(
+        searchTerm,
+        selectedCategory
+      );
     }
 
     setProducts(productsData);
     setLoading(false);
   };
 
-  // FONCTION DE RÉINITIALISATION FORCÉE
+  const handleSearch = (e) => {
+    e.preventDefault();
+    loadProducts();
+  };
+
+  const handleReset = () => {
+    setSearchTerm("");
+    setSelectedCategory("");
+    loadProducts();
+  };
+
   const forceResetProducts = () => {
-    console.log("Réinitialisation forcée...");
     productService.saveProducts(initialProducts);
     loadProducts();
   };
 
   if (loading) {
-    return <div className="p-6">Chargement...</div>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Chargement des produits...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">
-        Tous les Produits ({products.length})
-      </h1>
-
-      {/* MESSAGE D'ALERTE SI PROBLÈME */}
-      {products.length !== initialProducts.length && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-300 rounded">
-          <p className="text-red-700">
-            ⚠️ Problème détecté : {products.length} produit(s) affiché(s) au
-            lieu de {initialProducts.length}
-          </p>
-          <button onClick={forceResetProducts} className="btn btn-warning mt-2">
-            🔄 Forcer la réinitialisation des données
-          </button>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+    <div className="product-list-page">
+      {/* En-tête de la page */}
+      <div className="page-header">
+        <h1 className="page-title">Nos Produits Frais</h1>
+        <p className="page-subtitle">
+          Découvrez tous nos produits directement issus de l'agriculture locale
+        </p>
       </div>
+
+      {/* Barre de recherche et filtres */}
+      <div className="search-filters">
+        <form onSubmit={handleSearch} className="search-form">
+          <div className="search-group">
+            <input
+              type="text"
+              placeholder="Rechercher un produit..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <button type="submit" className="search-button">
+              🔍 Rechercher
+            </button>
+          </div>
+
+          <div className="filters-group">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="category-select"
+            >
+              <option value="">Toutes les catégories</option>
+              <option value="légumes">🥕 Légumes</option>
+              <option value="fruits">🍎 Fruits</option>
+              <option value="viandes">🥩 Viandes</option>
+              <option value="produits laitiers">🧀 Produits laitiers</option>
+              <option value="œufs">🥚 Œufs</option>
+              <option value="céréales">🌾 Céréales</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={handleReset}
+              className="reset-button"
+            >
+              🔄 Réinitialiser
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Message d'alerte si problème */}
+      {products.length !== initialProducts.length &&
+        !searchTerm &&
+        !selectedCategory && (
+          <div className="alert-warning">
+            <div className="alert-icon">⚠️</div>
+            <div className="alert-content">
+              <p className="alert-title">Problème détecté</p>
+              <p className="alert-message">
+                {products.length} produit(s) affiché(s) au lieu de{" "}
+                {initialProducts.length}
+              </p>
+            </div>
+            <button onClick={forceResetProducts} className="alert-button">
+              Réinitialiser les données
+            </button>
+          </div>
+        )}
+
+      {/* Résultats de la recherche */}
+      <div className="results-info">
+        <p className="results-count">
+          {products.length} produit(s) trouvé(s)
+          {searchTerm && ` pour "${searchTerm}"`}
+          {selectedCategory && ` dans la catégorie "${selectedCategory}"`}
+        </p>
+        <Link to="/cart" className="cart-link">
+          🛒 Voir mon panier
+        </Link>
+      </div>
+
+      {/* Grille des produits */}
+      {products.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🌱</div>
+          <h3 className="empty-title">Aucun produit trouvé</h3>
+          <p className="empty-message">
+            {searchTerm || selectedCategory
+              ? "Essayez de modifier vos critères de recherche"
+              : "Nos producteurs préparent de nouveaux produits frais"}
+          </p>
+          {(searchTerm || selectedCategory) && (
+            <button onClick={handleReset} className="empty-button">
+              Voir tous les produits
+            </button>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="products-grid">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          {/* Bouton pour voir plus de produits */}
+          <div className="load-more-section">
+            <p>Vous avez vu tous nos produits disponibles</p>
+            <Link to="/" className="home-link">
+              ← Retour à l'accueil
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   );
 };
