@@ -1,3 +1,105 @@
+AgriEcom/
+│── public/                      # Fichiers publics
+│   ├── index.html
+│   └── images/                  # Images statiques (logo, icônes, etc.)
+│
+│── src/
+│   ├── assets/                  # Images, icônes ou styles globaux
+│   ├── components/              # Composants réutilisables
+│   │   ├── Navbar.js
+│   │   ├── Footer.js
+│   │   ├── ProductCard.js
+│   │   ├── ProductForm.js
+│   │   └── UserProfile.js
+│   │
+│   ├── pages/                   # Pages principales
+│   │   ├── Home.js              # Accueil avec liste des produits
+│   │   ├── Login.js             # Connexion
+│   │   ├── Register.js          # Inscription
+│   │   ├── Profile.js           # Voir / Modifier profil
+│   │   ├── ProductList.js       # Tous les produits
+│   │   ├── ProductDetail.js     # Détails produit
+│   │   ├── Cart.js              # Panier / Achat
+│   │   ├── AdminDashboard.js    # Espace admin (utilisateurs, produits)
+│   │   └── MyProducts.js        # Produits publiés par un producteur
+│   │
+│   ├── context/                 # Contexte global (state management)
+│   │   ├── AuthContext.js       # Gestion utilisateur connecté
+│   │   └── CartContext.js       # Gestion panier
+│   │
+│   ├── data/                    # Simule le backend avec JSON
+│   │   ├── users.json           # Données utilisateurs
+│   │   ├── products.json        # Données produits
+│   │   └── categories.json      # Catégories disponibles
+│   │
+│   ├── services/                # Fonctions pour gérer les données
+│   │   ├── authService.js       # Gestion connexion / inscription
+│   │   ├── productService.js    # CRUD produits
+│   │   └── userService.js       # Gestion utilisateurs (admin)
+│   │
+│   ├── App.js                   # Router principal
+│   ├── index.js                 # Point d'entrée
+│   ├── routes.js                # Routes centralisées
+│   └── styles/                  # Styles CSS
+│       ├── global.css
+│       └── components.css
+│
+│── package.json
+│── README.md
+
+
+import React from "react";
+import UserProfile from "../components/UserProfile";
+
+const Profile = () => {
+  return (
+    <div>
+      <UserProfile />
+    </div>
+  );
+};
+
+export default Profile;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "name": "Admin AgriEcom",
+    "email": "admin@agriecom.com",
+    "password": "admin123",
+    "role": "admin",
+    "phone": "+33 1 23 45 67 89",
+    "address": "123 Rue de l'Agriculture, Paris",
+    "blocked": false,
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "name": "Jean Dupont",
+    "email": "jean@ferme.fr",
+    "password": "ferme123",
+    "role": "producer",
+    "phone": "+33 6 12 34 56 78",
+    "address": "Ferme de la Vallée, 78000 Versailles",
+    "farmName": "Ferme de la Vallée",
+    "description": "Producteur bio depuis 15 ans",
+    "blocked": false,
+    "createdAt": "2024-01-02T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "name": "Marie Lambert",
+    "email": "marie@exploitation.fr",
+    "password": "exploit123",
+    "role": "producer",
+    "phone": "+33 6 98 76 54 32",
+    "address": "Exploitation Lambert, 69000 Lyon",
+    "farmName": "Exploitation Lambert",
+    "description": "Éleveuse de bovins et productrice de céréales",
+    "blocked": false,
+    "createdAt": "2024-01-03T00:00:00.000Z"
+  },
+  {
+    "id": "4",
+    "name": "Pierre Martin",
+    "email": "pierre.martin@email.com",
+    "password": "client123",
+    "role": "user",
+    "phone": "+33 6 11 22 33 44",
+    "address": "15 Avenue des Champs, 75008 Paris",
+    "blocked": false,
+    "createdAt": "2024-01-04T00:00:00.000Z"
+  }
+]
