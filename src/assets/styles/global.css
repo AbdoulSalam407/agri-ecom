@@ -1749,3 +1749,196 @@ body {
     font-size: 1.3rem;
   }
 }
+
+/* ===== REGISTER SPECIFIC STYLES ===== */
+
+.register-card {
+  max-width: 600px;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Sélection du rôle */
+.role-selection {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 480px) {
+  .role-selection {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.role-option {
+  cursor: pointer;
+}
+
+.role-input {
+  display: none;
+}
+
+.role-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  height: 100%;
+}
+
+.role-input:checked + .role-card {
+  border-color: #4a7c3a;
+  background: #f0fdf4;
+  box-shadow: 0 4px 12px rgba(74, 124, 58, 0.1);
+}
+
+.role-card:hover {
+  border-color: #9ca3af;
+  transform: translateY(-2px);
+}
+
+.role-icon {
+  font-size: 2rem;
+  margin-top: 0.25rem;
+}
+
+.role-info {
+  flex: 1;
+}
+
+.role-title {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.role-description {
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Champs de formulaire spécifiques */
+.form-textarea {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #4a7c3a;
+  box-shadow: 0 0 0 3px rgba(74, 124, 58, 0.1);
+}
+
+/* Messages d'erreur */
+.error-text {
+  display: block;
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.form-input.error,
+.form-textarea.error {
+  border-color: #dc2626;
+}
+
+.form-input.error:focus,
+.form-textarea.error:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Bouton d'inscription spécifique */
+.register-button {
+  margin-top: 1rem;
+}
+
+/* Conditions d'utilisation */
+.terms-notice {
+  text-align: center;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+}
+
+.terms-notice p {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.terms-link {
+  color: #4a7c3a;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive pour register */
+@media (max-width: 768px) {
+  .register-card {
+    padding: 2rem 1rem;
+  }
+
+  .role-selection {
+    grid-template-columns: 1fr;
+  }
+
+  .role-card {
+    padding: 1rem;
+  }
+
+  .role-icon {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .role-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .role-icon {
+    margin-top: 0;
+  }
+}
