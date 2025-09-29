@@ -41,7 +41,7 @@
     "name": "Pierre Martin",
     "email": "pierre.martin@email.com",
     "password": "client123",
-    "role": "user",
+    "role": "Client",
     "phone": "+33 6 11 22 33 44",
     "address": "15 Avenue des Champs, 75008 Paris",
     "blocked": false,

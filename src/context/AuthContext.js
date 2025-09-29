@@ -21,13 +21,18 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = () => {
       try {
         const user = authService.getCurrentUser();
+        console.log("🔄 AuthContext - Utilisateur chargé:", user);
         setCurrentUser(user);
       } catch (error) {
-        console.error("Erreur lors du chargement de l'utilisateur:", error);
+        console.error(
+          "❌ AuthContext - Erreur lors du chargement de l'utilisateur:",
+          error
+        );
         setCurrentUser(null);
       } finally {
         setLoading(false);
         setAuthChecked(true);
+        console.log("✅ AuthContext - Initialisation terminée");
       }
     };
 
@@ -43,9 +48,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const user = await authService.login(email, password);
       setCurrentUser(user);
+      console.log("✅ AuthContext - Connexion réussie:", user.name);
       return { success: true, user };
     } catch (error) {
-      console.error("Erreur de connexion:", error);
+      console.error("❌ AuthContext - Erreur de connexion:", error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -64,11 +70,12 @@ export const AuthProvider = ({ children }) => {
 
     setLoading(true);
     try {
-      const user = await authService.register({ email, password, name, role });
+      const user = await authService.register(userData);
       setCurrentUser(user);
+      console.log("✅ AuthContext - Inscription réussie:", user.name);
       return { success: true, user };
     } catch (error) {
-      console.error("Erreur d'inscription:", error);
+      console.error("❌ AuthContext - Erreur d'inscription:", error);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
@@ -77,14 +84,18 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     try {
+      console.log("👋 AuthContext - Déconnexion de:", currentUser?.name);
       setCurrentUser(null);
       authService.logout();
+
       // Optionnel : Rediriger vers la page d'accueil après déconnexion
-      if (window.location.pathname !== "/") {
-        window.location.href = "/";
-      }
+      setTimeout(() => {
+        if (window.location.pathname !== "/") {
+          window.location.href = "/";
+        }
+      }, 100);
     } catch (error) {
-      console.error("Erreur lors de la déconnexion:", error);
+      console.error("❌ AuthContext - Erreur lors de la déconnexion:", error);
     }
   };
 
@@ -99,36 +110,50 @@ export const AuthProvider = ({ children }) => {
         userData
       );
       setCurrentUser(updatedUser);
+      console.log("✅ AuthContext - Profil mis à jour:", updatedUser.name);
       return { success: true, user: updatedUser };
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du profil:", error);
+      console.error(
+        "❌ AuthContext - Erreur lors de la mise à jour du profil:",
+        error
+      );
       return { success: false, error: error.message };
     }
   };
 
   // Vérifier si l'utilisateur a un rôle spécifique
   const hasRole = (role) => {
-    return currentUser?.role === role;
+    const hasRole = currentUser?.role === role;
+    console.log(`🔍 AuthContext - Vérification rôle ${role}:`, hasRole);
+    return hasRole;
   };
 
   // Vérifier si l'utilisateur a l'un des rôles spécifiés
   const hasAnyRole = (roles) => {
-    return roles.includes(currentUser?.role);
+    const hasAny = roles.includes(currentUser?.role);
+    console.log(`🔍 AuthContext - Vérification rôles ${roles}:`, hasAny);
+    return hasAny;
   };
 
   // Vérifier si l'utilisateur est connecté
   const isAuthenticated = () => {
-    return !!currentUser && !currentUser.blocked;
+    const isAuth = !!currentUser && !currentUser.blocked;
+    console.log(`🔍 AuthContext - Utilisateur authentifié:`, isAuth);
+    return isAuth;
   };
 
   // Vérifier si l'utilisateur est bloqué
   const isBlocked = () => {
-    return currentUser?.blocked === true;
+    const blocked = currentUser?.blocked === true;
+    console.log(`🔍 AuthContext - Utilisateur bloqué:`, blocked);
+    return blocked;
   };
 
   // Obtenir le rôle de l'utilisateur
   const getUserRole = () => {
-    return currentUser?.role || "guest";
+    const role = currentUser?.role || "guest";
+    console.log(`🔍 AuthContext - Rôle utilisateur:`, role);
+    return role;
   };
 
   const value = {

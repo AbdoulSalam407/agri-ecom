@@ -9,17 +9,17 @@ const validateUserData = (userData, isUpdate = false) => {
 
   if (!isUpdate || userData.email !== undefined) {
     if (!userData.email || !/\S+@\S+\.\S+/.test(userData.email)) {
-      errors.push('Email invalide');
+      errors.push("Email invalide");
     }
   }
 
   if (!isUpdate && (!userData.password || userData.password.length < 6)) {
-    errors.push('Le mot de passe doit contenir au moins 6 caractères');
+    errors.push("Le mot de passe doit contenir au moins 6 caractères");
   }
 
   if (!isUpdate || userData.name !== undefined) {
     if (!userData.name || userData.name.trim().length < 2) {
-      errors.push('Le nom doit contenir au moins 2 caractères');
+      errors.push("Le nom doit contenir au moins 2 caractères");
     }
   }
 
@@ -32,10 +32,17 @@ const initializeUsers = () => {
     const existingUsers = localStorage.getItem(STORAGE_KEY);
     if (!existingUsers || JSON.parse(existingUsers).length === 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialUsers));
-      console.log("✅ Utilisateurs initialisés depuis users.json:", initialUsers.length, "utilisateurs");
+      console.log(
+        "✅ Utilisateurs initialisés depuis users.json:",
+        initialUsers.length,
+        "utilisateurs"
+      );
     }
   } catch (error) {
-    console.error("❌ Erreur lors de l'initialisation des utilisateurs:", error);
+    console.error(
+      "❌ Erreur lors de l'initialisation des utilisateurs:",
+      error
+    );
   }
 };
 
@@ -49,7 +56,6 @@ export const authService = {
       const users = localStorage.getItem(STORAGE_KEY);
       if (users) {
         const parsedUsers = JSON.parse(users);
-        console.log("📊 Utilisateurs chargés depuis localStorage:", parsedUsers.length);
         return parsedUsers;
       } else {
         console.log("📁 localStorage vide, retour aux données initiales");
@@ -65,7 +71,6 @@ export const authService = {
   saveUsers: (users) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-      console.log("💾 Utilisateurs sauvegardés:", users.length);
       return true;
     } catch (error) {
       console.error("❌ Erreur lors de la sauvegarde des utilisateurs:", error);
@@ -73,12 +78,12 @@ export const authService = {
     }
   },
 
-  // Connexion
+  // NOUVELLE VERSION - Fonction login corrigée
   login: (email, password) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
-          // Validation des entrées
+          // Validation basique
           if (!email || !password) {
             reject(new Error("Email et mot de passe requis"));
             return;
@@ -88,63 +93,145 @@ export const authService = {
           const cleanEmail = email.toLowerCase().trim();
           const cleanPassword = password.trim();
 
-          console.log("🔍 Tentative de connexion:", { email: cleanEmail });
-          console.log("📋 Utilisateurs disponibles:", users.map(u => ({ 
-            email: u.email, 
-            role: u.role,
-            blocked: u.blocked 
-          })));
+          console.log("🔄 LOGIN - Recherche utilisateur:", cleanEmail);
+          console.log(
+            "📋 Utilisateurs en base:",
+            users.map((u) => ({
+              id: u.id,
+              email: u.email,
+              role: u.role,
+              blocked: u.blocked,
+            }))
+          );
 
-          // Recherche de l'utilisateur
-          const user = users.find(u => {
-            const userEmail = u.email ? u.email.toLowerCase().trim() : '';
-            const passwordMatch = u.password === cleanPassword;
-            const emailMatch = userEmail === cleanEmail;
-            const notBlocked = !u.blocked;
-            
-            console.log(`🔎 Comparaison ${userEmail} : emailMatch=${emailMatch}, passwordMatch=${passwordMatch}, notBlocked=${notBlocked}`);
-            
-            return emailMatch && passwordMatch && notBlocked;
-          });
+          let userFound = null;
+          let rejectionReason = null;
 
-          if (user) {
-            console.log("✅ Connexion réussie pour:", user.name);
-            
-            // Mettre à jour la dernière connexion
+          // Recherche utilisateur
+          for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+            const userEmail = user.email ? user.email.toLowerCase().trim() : "";
+
+            console.log(`🔍 Vérification: ${userEmail} vs ${cleanEmail}`);
+
+            if (userEmail === cleanEmail) {
+              // Email trouvé, vérification du mot de passe
+              if (user.password === cleanPassword) {
+                if (!user.blocked) {
+                  userFound = user;
+                  break;
+                } else {
+                  rejectionReason =
+                    "Votre compte a été bloqué. Contactez l'administrateur.";
+                  break;
+                }
+              } else {
+                rejectionReason = "Mot de passe incorrect";
+                break;
+              }
+            }
+          }
+
+          if (userFound) {
+            console.log("✅ CONNEXION RÉUSSIE:", userFound.name);
+
+            // Mise à jour dernière connexion
             const updatedUser = {
-              ...user,
-              lastLogin: new Date().toISOString()
+              ...userFound,
+              lastLogin: new Date().toISOString(),
             };
 
-            const updatedUsers = users.map(u => 
-              u.id === user.id ? updatedUser : u
+            // Mise à jour dans la liste des utilisateurs
+            const updatedUsers = users.map((u) =>
+              u.id === userFound.id ? updatedUser : u
             );
-            authService.saveUsers(updatedUsers);
 
+            authService.saveUsers(updatedUsers);
             localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
             resolve(updatedUser);
           } else {
-            // Diagnostic détaillé de l'échec
-            const userByEmail = users.find(u => 
-              u.email.toLowerCase().trim() === cleanEmail
-            );
-
-            if (userByEmail) {
-              if (userByEmail.blocked) {
-                reject(new Error("Votre compte a été bloqué. Contactez l'administrateur."));
-              } else if (userByEmail.password !== cleanPassword) {
-                reject(new Error("Mot de passe incorrect"));
-              }
+            if (rejectionReason) {
+              reject(new Error(rejectionReason));
             } else {
-              reject(new Error("Aucun compte trouvé avec cet email"));
+              reject(new Error(`Aucun compte trouvé avec l'email: ${email}`));
             }
           }
         } catch (error) {
-          console.error("❌ Erreur lors de la connexion:", error);
+          console.error("❌ Erreur technique lors de la connexion:", error);
           reject(new Error("Erreur technique lors de la connexion"));
         }
       }, 500);
     });
+  },
+
+  // Fonction de débogage pour tester la connexion
+  debugLogin: (email, password) => {
+    console.log("🧪 DÉBUT DU DÉBOGAGE LOGIN");
+
+    const users = authService.getUsers();
+    const cleanEmail = email.toLowerCase().trim();
+
+    console.log("📊 LISTE COMPLÈTE DES UTILISATEURS:");
+    users.forEach((user) => {
+      console.log(
+        `- ID: ${user.id}, Email: "${user.email}", Password: "${user.password}", Role: ${user.role}`
+      );
+    });
+
+    console.log(
+      `🔍 RECHERCHE: "${cleanEmail}" avec mot de passe: "${password}"`
+    );
+
+    const foundUser = users.find((user) => {
+      const userEmail = user.email.toLowerCase().trim();
+      return userEmail === cleanEmail && user.password === password;
+    });
+
+    if (foundUser) {
+      console.log("✅ UTILISATEUR TROUVÉ:", foundUser);
+      return { success: true, user: foundUser };
+    } else {
+      console.log("❌ UTILISATEUR NON TROUVÉ");
+
+      // Vérification étape par étape
+      const userByEmail = users.find(
+        (user) => user.email.toLowerCase().trim() === cleanEmail
+      );
+
+      if (userByEmail) {
+        console.log("📧 Email trouvé mais problème de mot de passe");
+        console.log(`🔑 Mot de passe fourni: "${password}"`);
+        console.log(`🔑 Mot de passe stocké: "${userByEmail.password}"`);
+        console.log(`✅ Correspondance: ${userByEmail.password === password}`);
+
+        if (userByEmail.blocked) {
+          console.log("🚫 Compte bloqué");
+        }
+      } else {
+        console.log("📧 Email non trouvé dans la base");
+        console.log(
+          "📧 Emails disponibles:",
+          users.map((u) => u.email.toLowerCase())
+        );
+      }
+
+      return { success: false, user: null };
+    }
+  },
+
+  // Vérification rapide des données
+  checkData: () => {
+    const users = authService.getUsers();
+    console.log("🔍 VÉRIFICATION DES DONNÉES:");
+    console.log("Nombre d'utilisateurs:", users.length);
+
+    users.forEach((user) => {
+      console.log(
+        `- ${user.email} (${user.role}): ${user.blocked ? "BLOQUÉ" : "ACTIF"}`
+      );
+    });
+
+    return users;
   },
 
   // Inscription
@@ -161,9 +248,9 @@ export const authService = {
 
           const users = authService.getUsers();
           const cleanEmail = userData.email.toLowerCase().trim();
-          
-          const existingUser = users.find(u => 
-            u.email.toLowerCase().trim() === cleanEmail
+
+          const existingUser = users.find(
+            (u) => u.email.toLowerCase().trim() === cleanEmail
           );
 
           if (existingUser) {
@@ -222,10 +309,12 @@ export const authService = {
     try {
       const user = localStorage.getItem(CURRENT_USER_KEY);
       const parsedUser = user ? JSON.parse(user) : null;
-      console.log("👤 Utilisateur courant:", parsedUser ? parsedUser.name : "Non connecté");
       return parsedUser;
     } catch (error) {
-      console.error("❌ Erreur lors de la récupération de l'utilisateur:", error);
+      console.error(
+        "❌ Erreur lors de la récupération de l'utilisateur:",
+        error
+      );
       return null;
     }
   },
@@ -258,7 +347,9 @@ export const authService = {
             );
 
             if (emailExists) {
-              reject(new Error("Cet email est déjà utilisé par un autre utilisateur"));
+              reject(
+                new Error("Cet email est déjà utilisé par un autre utilisateur")
+              );
               return;
             }
           }
@@ -384,11 +475,11 @@ export const authService = {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(CURRENT_USER_KEY);
       initializeUsers();
-      console.log("🔄 Données réinitialisées");
+      console.log("🔄 Données réinitialisées avec succès");
       return true;
     } catch (error) {
       console.error("❌ Erreur lors de la réinitialisation:", error);
       return false;
     }
-  }
+  },
 };

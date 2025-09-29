@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
@@ -8,25 +8,42 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const { login, currentUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Récupérer la redirection prévue depuis l'état de la localisation
+  const from = location.state?.from?.pathname || "/";
 
   // Rediriger si l'utilisateur est déjà connecté
   useEffect(() => {
-    if (isAuthenticated()) {
-      navigate("/");
+    if (isAuthenticated() && currentUser) {
+      console.log(
+        "🔄 Redirection depuis Login - utilisateur déjà connecté:",
+        currentUser.name
+      );
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, currentUser, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setMessage({ type: "", text: "" });
     setLoading(true);
 
     // Validation basique
     if (!email || !password) {
       setError("Veuillez remplir tous les champs");
+      setLoading(false);
+      return;
+    }
+
+    // Validation de l'email
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Veuillez entrer une adresse email valide");
       setLoading(false);
       return;
     }
@@ -40,39 +57,71 @@ const Login = () => {
           type: "success",
           text: `Bienvenue ${result.user.name} !`,
         });
-        setTimeout(() => navigate("/"), 1000);
+
+        // Redirection après un court délai pour voir le message
+        setTimeout(() => {
+          navigate(from, { replace: true });
+        }, 1500);
       } else {
-        setError(result.error);
+        setError(result.error || "Erreur de connexion");
       }
     } catch (error) {
-      setError("Une erreur est survenue lors de la connexion");
       console.error("Erreur de connexion:", error);
+      setError("Une erreur inattendue est survenue lors de la connexion");
     } finally {
       setLoading(false);
     }
   };
 
-  const [message, setMessage] = useState({ type: "", text: "" });
-
-  // Comptes de test pour faciliter les démonstrations
+  // Comptes de test pour faciliter les démonstrations - CORRIGÉ
   const testAccounts = [
     {
+      id: "1",
+      name: "Admin AgriEcom",
       email: "admin@agriecom.com",
       password: "admin123",
-      role: "Admin",
-      description: "Accès complet à la plateforme",
+      role: "admin",
+      phone: "+33 1 23 45 67 89",
+      address: "123 Rue de l'Agriculture, Paris",
+      blocked: false,
+      createdAt: "2024-01-01T00:00:00.000Z",
     },
     {
+      id: "2",
+      name: "Jean Dupont",
       email: "jean@ferme.fr",
       password: "ferme123",
-      role: "Producteur",
-      description: "Gestion des produits et ventes",
+      role: "producer",
+      phone: "+33 6 12 34 56 78",
+      address: "Ferme de la Vallée, 78000 Versailles",
+      farmName: "Ferme de la Vallée",
+      description: "Producteur bio depuis 15 ans",
+      blocked: false,
+      createdAt: "2024-01-02T00:00:00.000Z",
     },
     {
+      id: "3",
+      name: "Marie Lambert",
+      email: "marie@exploitation.fr",
+      password: "exploit123",
+      role: "producer",
+      phone: "+33 6 98 76 54 32",
+      address: "Exploitation Lambert, 69000 Lyon",
+      farmName: "Exploitation Lambert",
+      description: "Éleveuse de bovins et productrice de céréales",
+      blocked: false,
+      createdAt: "2024-01-03T00:00:00.000Z",
+    },
+    {
+      id: "4",
+      name: "Pierre Martin",
       email: "pierre.martin@email.com",
       password: "client123",
-      role: "Client",
-      description: "Achat de produits frais",
+      role: "client", // CORRECTION : "Client" → "client"
+      phone: "+33 6 11 22 33 44",
+      address: "15 Avenue des Champs, 75008 Paris",
+      blocked: false,
+      createdAt: "2024-01-04T00:00:00.000Z",
     },
   ];
 
@@ -80,20 +129,40 @@ const Login = () => {
     setEmail(account.email);
     setPassword(account.password);
     setError("");
-    setMessage({ type: "info", text: `Compte ${account.role} pré-rempli` });
+    setMessage({
+      type: "info",
+      text: `Compte ${account.role} pré-rempli - Cliquez sur "Se connecter"`,
+    });
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  if (isAuthenticated()) {
+  const clearForm = () => {
+    setEmail("");
+    setPassword("");
+    setError("");
+    setMessage({ type: "", text: "" });
+  };
+
+  // Si l'utilisateur est déjà authentifié, afficher un message de redirection
+  if (isAuthenticated() && currentUser) {
     return (
       <div className="auth-container">
-        <div className="auth-success">
-          <div className="success-icon">✅</div>
-          <h2>Vous êtes déjà connecté</h2>
-          <p>Redirection en cours...</p>
+        <div className="auth-card">
+          <div className="auth-success">
+            <div className="success-icon">✅</div>
+            <h2>Vous êtes déjà connecté</h2>
+            <p>Redirection vers la page d'accueil...</p>
+            <button
+              onClick={() => navigate("/")}
+              className="auth-button"
+              style={{ marginTop: "1rem" }}
+            >
+              Aller à l'accueil maintenant
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -126,6 +195,13 @@ const Login = () => {
               <p className="error-title">Erreur de connexion</p>
               <p className="error-message">{error}</p>
             </div>
+            <button
+              onClick={clearForm}
+              className="clear-form-button"
+              type="button"
+            >
+              ✕
+            </button>
           </div>
         )}
 
@@ -142,13 +218,20 @@ const Login = () => {
                 type="button"
                 onClick={() => fillTestAccount(account)}
                 className="test-account-card"
+                disabled={loading}
               >
                 <div className="account-role">{account.role}</div>
                 <div className="account-email">{account.email}</div>
                 <div className="account-description">{account.description}</div>
+                <div className="account-hint">Cliquez pour remplir</div>
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Séparateur */}
+        <div className="form-separator">
+          <span>Ou connectez-vous manuellement</span>
         </div>
 
         {/* Formulaire de connexion */}
@@ -164,8 +247,10 @@ const Login = () => {
               placeholder="votre@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
               required
               className="form-input"
+              autoComplete="email"
             />
           </div>
 
@@ -181,20 +266,28 @@ const Login = () => {
                 placeholder="Votre mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
                 required
                 className="form-input password-input"
+                autoComplete="current-password"
               />
               <button
                 type="button"
                 onClick={togglePasswordVisibility}
                 className="password-toggle"
+                disabled={loading}
+                tabIndex={-1}
               >
                 {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="auth-button">
+          <button
+            type="submit"
+            disabled={loading || !email || !password}
+            className="auth-button"
+          >
             {loading ? (
               <>
                 <span className="button-spinner"></span>
@@ -213,7 +306,11 @@ const Login = () => {
         <div className="auth-links">
           <p className="auth-link-text">
             Pas encore de compte ?{" "}
-            <Link to="/register" className="auth-link">
+            <Link
+              to="/register"
+              className="auth-link"
+              state={{ from: location.state?.from }}
+            >
               Créer un compte
             </Link>
           </p>
