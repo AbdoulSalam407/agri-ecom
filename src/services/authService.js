@@ -1,35 +1,45 @@
+// Importation des données utilisateurs initiales depuis un fichier JSON
 import initialUsers from "../data/users.json";
 
-const STORAGE_KEY = "agriecom_users";
-const CURRENT_USER_KEY = "agriecom_current_user";
+// Clés pour le stockage localStorage
+const STORAGE_KEY = "agriecom_users"; // Clé pour stocker tous les utilisateurs
+const CURRENT_USER_KEY = "agriecom_current_user"; // Clé pour l'utilisateur connecté
 
-// Validation des données utilisateur
+// ===== FONCTION DE VALIDATION DES DONNÉES UTILISATEUR =====
+// Cette fonction vérifie que les données utilisateur sont valides
 const validateUserData = (userData, isUpdate = false) => {
-  const errors = [];
+  const errors = []; // Tableau pour stocker les erreurs
 
+  // Validation de l'email (seulement si nouveau ou si email modifié)
   if (!isUpdate || userData.email !== undefined) {
     if (!userData.email || !/\S+@\S+\.\S+/.test(userData.email)) {
       errors.push("Email invalide");
     }
   }
 
+  // Validation du mot de passe (seulement pour les nouvelles inscriptions)
   if (!isUpdate && (!userData.password || userData.password.length < 6)) {
     errors.push("Le mot de passe doit contenir au moins 6 caractères");
   }
 
+  // Validation du nom (seulement si nouveau ou si nom modifié)
   if (!isUpdate || userData.name !== undefined) {
     if (!userData.name || userData.name.trim().length < 2) {
       errors.push("Le nom doit contenir au moins 2 caractères");
     }
   }
 
-  return errors;
+  return errors; // Retourne la liste des erreurs
 };
 
-// Fonction d'initialisation
+// ===== FONCTION D'INITIALISATION DES DONNÉES =====
+// Cette fonction prépare les données utilisateurs au démarrage de l'application
 const initializeUsers = () => {
   try {
+    // Vérifie si des utilisateurs existent déjà dans le localStorage
     const existingUsers = localStorage.getItem(STORAGE_KEY);
+
+    // Si aucun utilisateur n'existe ou si la liste est vide, on initialise avec les données JSON
     if (!existingUsers || JSON.parse(existingUsers).length === 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialUsers));
       console.log(
@@ -46,51 +56,66 @@ const initializeUsers = () => {
   }
 };
 
-// Appeler l'initialisation au chargement du module
+// ===== INITIALISATION AU CHARGEMENT DU MODULE =====
+// Appelle la fonction d'initialisation dès que ce fichier est importé
 initializeUsers();
 
+// ===== EXPORTATION DU SERVICE D'AUTHENTIFICATION =====
+// Cet objet contient toutes les fonctions pour gérer l'authentification
 export const authService = {
-  // Récupérer tous les utilisateurs
+  // ===== RÉCUPÉRER TOUS LES UTILISATEURS =====
   getUsers: () => {
     try {
+      // Récupère les utilisateurs depuis le localStorage
       const users = localStorage.getItem(STORAGE_KEY);
+
       if (users) {
+        // Convertit la chaîne JSON en objet JavaScript
         const parsedUsers = JSON.parse(users);
         return parsedUsers;
       } else {
+        // Si le localStorage est vide, retourne les données initiales
         console.log("📁 localStorage vide, retour aux données initiales");
         return initialUsers;
       }
     } catch (error) {
+      // En cas d'erreur, retourne les données initiales
       console.error("❌ Erreur lors de la lecture des utilisateurs:", error);
       return initialUsers;
     }
   },
 
-  // Sauvegarder les utilisateurs
+  // ===== SAUVEGARDER LES UTILISATEURS =====
   saveUsers: (users) => {
     try {
+      // Convertit les utilisateurs en JSON et les sauvegarde
       localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-      return true;
+      return true; // Succès
     } catch (error) {
       console.error("❌ Erreur lors de la sauvegarde des utilisateurs:", error);
-      return false;
+      return false; // Échec
     }
   },
 
-  // NOUVELLE VERSION - Fonction login corrigée
+  // ===== FONCTION DE CONNEXION =====
+  // Cette fonction vérifie les identifiants et connecte l'utilisateur
   login: (email, password) => {
+    // Retourne une Promise (objet pour gérer les opérations asynchrones)
     return new Promise((resolve, reject) => {
+      // Simule un délai réseau de 500ms
       setTimeout(() => {
         try {
-          // Validation basique
+          // Validation basique des champs
           if (!email || !password) {
             reject(new Error("Email et mot de passe requis"));
             return;
           }
 
+          // Récupère tous les utilisateurs
           const users = authService.getUsers();
+          // Nettoie et normalise l'email
           const cleanEmail = email.toLowerCase().trim();
+          // Nettoie le mot de passe
           const cleanPassword = password.trim();
 
           console.log("🔄 LOGIN - Recherche utilisateur:", cleanEmail);
@@ -104,22 +129,24 @@ export const authService = {
             }))
           );
 
-          let userFound = null;
-          let rejectionReason = null;
+          let userFound = null; // Utilisateur trouvé
+          let rejectionReason = null; // Raison du rejet
 
-          // Recherche utilisateur
+          // Parcourt tous les utilisateurs pour trouver une correspondance
           for (let i = 0; i < users.length; i++) {
             const user = users[i];
             const userEmail = user.email ? user.email.toLowerCase().trim() : "";
 
             console.log(`🔍 Vérification: ${userEmail} vs ${cleanEmail}`);
 
+            // Vérifie si l'email correspond
             if (userEmail === cleanEmail) {
               // Email trouvé, vérification du mot de passe
               if (user.password === cleanPassword) {
+                // Vérifie si le compte n'est pas bloqué
                 if (!user.blocked) {
                   userFound = user;
-                  break;
+                  break; // Sort de la boucle
                 } else {
                   rejectionReason =
                     "Votre compte a été bloqué. Contactez l'administrateur.";
@@ -132,24 +159,30 @@ export const authService = {
             }
           }
 
+          // Si un utilisateur valide est trouvé
           if (userFound) {
             console.log("✅ CONNEXION RÉUSSIE:", userFound.name);
 
-            // Mise à jour dernière connexion
+            // Met à jour la date de dernière connexion
             const updatedUser = {
-              ...userFound,
-              lastLogin: new Date().toISOString(),
+              ...userFound, // Copie toutes les propriétés de userFound
+              lastLogin: new Date().toISOString(), // Ajoute la date actuelle
             };
 
-            // Mise à jour dans la liste des utilisateurs
+            // Met à jour l'utilisateur dans la liste
             const updatedUsers = users.map((u) =>
               u.id === userFound.id ? updatedUser : u
             );
 
+            // Sauvegarde la liste mise à jour
             authService.saveUsers(updatedUsers);
+            // Sauvegarde l'utilisateur connecté dans le localStorage
             localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
+
+            // Résout la Promise avec l'utilisateur mis à jour
             resolve(updatedUser);
           } else {
+            // Aucun utilisateur trouvé
             if (rejectionReason) {
               reject(new Error(rejectionReason));
             } else {
@@ -157,20 +190,22 @@ export const authService = {
             }
           }
         } catch (error) {
+          // Gestion des erreurs techniques
           console.error("❌ Erreur technique lors de la connexion:", error);
           reject(new Error("Erreur technique lors de la connexion"));
         }
-      }, 500);
+      }, 500); // Délai de 500ms
     });
   },
 
-  // Fonction de débogage pour tester la connexion
+  // ===== FONCTION DE DÉBOGAGE POUR TESTER LA CONNEXION =====
   debugLogin: (email, password) => {
     console.log("🧪 DÉBUT DU DÉBOGAGE LOGIN");
 
     const users = authService.getUsers();
     const cleanEmail = email.toLowerCase().trim();
 
+    // Affiche tous les utilisateurs pour le débogage
     console.log("📊 LISTE COMPLÈTE DES UTILISATEURS:");
     users.forEach((user) => {
       console.log(
@@ -182,6 +217,7 @@ export const authService = {
       `🔍 RECHERCHE: "${cleanEmail}" avec mot de passe: "${password}"`
     );
 
+    // Recherche l'utilisateur avec email et mot de passe exacts
     const foundUser = users.find((user) => {
       const userEmail = user.email.toLowerCase().trim();
       return userEmail === cleanEmail && user.password === password;
@@ -193,7 +229,7 @@ export const authService = {
     } else {
       console.log("❌ UTILISATEUR NON TROUVÉ");
 
-      // Vérification étape par étape
+      // Vérification étape par étape pour comprendre l'erreur
       const userByEmail = users.find(
         (user) => user.email.toLowerCase().trim() === cleanEmail
       );
@@ -219,12 +255,13 @@ export const authService = {
     }
   },
 
-  // Vérification rapide des données
+  // ===== VÉRIFICATION RAPIDE DES DONNÉES =====
   checkData: () => {
     const users = authService.getUsers();
     console.log("🔍 VÉRIFICATION DES DONNÉES:");
     console.log("Nombre d'utilisateurs:", users.length);
 
+    // Affiche chaque utilisateur avec ses informations principales
     users.forEach((user) => {
       console.log(
         `- ${user.email} (${user.role}): ${user.blocked ? "BLOQUÉ" : "ACTIF"}`
@@ -234,12 +271,12 @@ export const authService = {
     return users;
   },
 
-  // Inscription
+  // ===== FONCTION D'INSCRIPTION =====
   register: (userData) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
-          // Validation des données
+          // Validation des données du formulaire
           const validationErrors = validateUserData(userData);
           if (validationErrors.length > 0) {
             reject(new Error(validationErrors.join(", ")));
@@ -249,6 +286,7 @@ export const authService = {
           const users = authService.getUsers();
           const cleanEmail = userData.email.toLowerCase().trim();
 
+          // Vérifie si l'email existe déjà
           const existingUser = users.find(
             (u) => u.email.toLowerCase().trim() === cleanEmail
           );
@@ -258,21 +296,23 @@ export const authService = {
             return;
           }
 
+          // Crée un nouvel utilisateur
           const newUser = {
-            id: Date.now().toString(),
+            id: Date.now().toString(), // ID unique basé sur le timestamp
             email: cleanEmail,
             password: userData.password.trim(),
             name: userData.name.trim(),
-            role: userData.role || "user",
+            role: userData.role || "user", // Rôle par défaut: "user"
             phone: userData.phone || "",
             address: userData.address || "",
             farmName: userData.farmName || "",
             description: userData.description || "",
-            blocked: false,
-            createdAt: new Date().toISOString(),
-            lastLogin: null,
+            blocked: false, // Nouveau compte non bloqué
+            createdAt: new Date().toISOString(), // Date de création
+            lastLogin: null, // Pas encore connecté
           };
 
+          // Ajoute le nouvel utilisateur à la liste
           const updatedUsers = [...users, newUser];
           const saveSuccess = authService.saveUsers(updatedUsers);
 
@@ -281,6 +321,7 @@ export const authService = {
             return;
           }
 
+          // Connecte automatiquement le nouvel utilisateur
           localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
           console.log("✅ Nouvel utilisateur créé:", newUser.name);
           resolve(newUser);
@@ -292,9 +333,10 @@ export const authService = {
     });
   },
 
-  // Déconnexion
+  // ===== FONCTION DE DÉCONNEXION =====
   logout: () => {
     try {
+      // Supprime l'utilisateur connecté du localStorage
       localStorage.removeItem(CURRENT_USER_KEY);
       console.log("👋 Utilisateur déconnecté");
       return true;
@@ -304,7 +346,7 @@ export const authService = {
     }
   },
 
-  // Récupérer l'utilisateur courant
+  // ===== RÉCUPÉRER L'UTILISATEUR ACTUELLEMENT CONNECTÉ =====
   getCurrentUser: () => {
     try {
       const user = localStorage.getItem(CURRENT_USER_KEY);
@@ -319,11 +361,12 @@ export const authService = {
     }
   },
 
-  // Mettre à jour le profil
+  // ===== METTRE À JOUR LE PROFIL =====
   updateProfile: (userId, userData) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
+          // Validation des données (mode mise à jour)
           const validationErrors = validateUserData(userData, true);
           if (validationErrors.length > 0) {
             reject(new Error(validationErrors.join(", ")));
@@ -331,6 +374,7 @@ export const authService = {
           }
 
           const users = authService.getUsers();
+          // Trouve l'index de l'utilisateur à modifier
           const userIndex = users.findIndex((user) => user.id === userId);
 
           if (userIndex === -1) {
@@ -338,11 +382,12 @@ export const authService = {
             return;
           }
 
+          // Vérifie si le nouvel email n'est pas déjà utilisé
           if (userData.email) {
             const cleanEmail = userData.email.toLowerCase().trim();
             const emailExists = users.some(
               (user, index) =>
-                index !== userIndex &&
+                index !== userIndex && // Ignore l'utilisateur actuel
                 user.email.toLowerCase().trim() === cleanEmail
             );
 
@@ -354,25 +399,28 @@ export const authService = {
             }
           }
 
+          // Crée l'utilisateur mis à jour
           const updatedUser = {
-            ...users[userIndex],
-            ...userData,
-            id: users[userIndex].id,
-            role: users[userIndex].role,
-            blocked: users[userIndex].blocked,
-            createdAt: users[userIndex].createdAt,
+            ...users[userIndex], // Conserve les anciennes données
+            ...userData, // Applique les nouvelles données
+            id: users[userIndex].id, // Garde le même ID
+            role: users[userIndex].role, // Ne change pas le rôle
+            blocked: users[userIndex].blocked, // Ne change pas le statut bloqué
+            createdAt: users[userIndex].createdAt, // Garde la date de création
           };
 
-          // Nettoyage des champs
+          // Nettoie les champs undefined
           Object.keys(updatedUser).forEach((key) => {
             if (updatedUser[key] === undefined) {
               updatedUser[key] = users[userIndex][key];
             }
           });
 
+          // Met à jour la liste des utilisateurs
           users[userIndex] = updatedUser;
           authService.saveUsers(users);
 
+          // Si l'utilisateur modifié est celui connecté, met à jour la session
           const currentUser = authService.getCurrentUser();
           if (currentUser && currentUser.id === userId) {
             localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(updatedUser));
@@ -386,7 +434,7 @@ export const authService = {
     });
   },
 
-  // Bloquer/débloquer un utilisateur
+  // ===== BLOQUER/DÉBLOQUER UN UTILISATEUR =====
   toggleBlockUser: (userId) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -399,6 +447,7 @@ export const authService = {
             return;
           }
 
+          // Inverse le statut bloqué
           const updatedUser = {
             ...users[userIndex],
             blocked: !users[userIndex].blocked,
@@ -407,6 +456,7 @@ export const authService = {
           users[userIndex] = updatedUser;
           authService.saveUsers(users);
 
+          // Si l'utilisateur bloqué est connecté, le déconnecte
           if (updatedUser.blocked) {
             const currentUser = authService.getCurrentUser();
             if (currentUser && currentUser.id === userId) {
@@ -422,13 +472,14 @@ export const authService = {
     });
   },
 
-  // Rechercher des utilisateurs
+  // ===== RECHERCHER DES UTILISATEURS =====
   searchUsers: (query) => {
     try {
       const users = authService.getUsers();
-      if (!query) return users;
+      if (!query) return users; // Retourne tous si pas de recherche
 
       const cleanQuery = query.toLowerCase().trim();
+      // Filtre les utilisateurs selon le critère de recherche
       return users.filter(
         (user) =>
           user.name.toLowerCase().includes(cleanQuery) ||
@@ -441,14 +492,16 @@ export const authService = {
     }
   },
 
-  // Supprimer un utilisateur
+  // ===== SUPPRIMER UN UTILISATEUR =====
   deleteUser: (userId) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
           const users = authService.getUsers();
+          // Filtre pour supprimer l'utilisateur
           const filteredUsers = users.filter((user) => user.id !== userId);
 
+          // Vérifie si un utilisateur a été supprimé
           if (filteredUsers.length === users.length) {
             reject(new Error("Utilisateur non trouvé"));
             return;
@@ -456,6 +509,7 @@ export const authService = {
 
           authService.saveUsers(filteredUsers);
 
+          // Si l'utilisateur supprimé est connecté, le déconnecte
           const currentUser = authService.getCurrentUser();
           if (currentUser && currentUser.id === userId) {
             authService.logout();
@@ -469,11 +523,13 @@ export const authService = {
     });
   },
 
-  // Réinitialiser les données (debug)
+  // ===== RÉINITIALISER LES DONNÉES (DEBUG) =====
   resetData: () => {
     try {
+      // Supprime toutes les données du localStorage
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(CURRENT_USER_KEY);
+      // Réinitialise avec les données JSON
       initializeUsers();
       console.log("🔄 Données réinitialisées avec succès");
       return true;

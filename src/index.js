@@ -4,6 +4,7 @@ import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import "./assets/styles/global.css";
+import './index.css'
 
 // Initialisation des données AVANT le rendu
 import { authService } from "./services/authService";
@@ -26,7 +27,9 @@ root.render(
     <AuthProvider>
       <CartProvider>
         <App />
+        <div className="version-info"></div>
       </CartProvider>
     </AuthProvider>
   </React.StrictMode>
+
 );

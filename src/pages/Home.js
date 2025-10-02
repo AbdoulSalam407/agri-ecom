@@ -1,134 +1,207 @@
+// Importation de React et des hooks useState et useEffect
 import React, { useState, useEffect } from "react";
+
+// Importation des composants de navigation et des services
 import { Link } from "react-router-dom";
 import { productService } from "../services/productService";
 import ProductCard from "../components/ProductCard";
 import { useAuth } from "../context/AuthContext";
 
+// Définition du composant Home (page d'accueil)
 const Home = () => {
+  // État pour stocker la liste des produits
   const [products, setProducts] = useState([]);
+
+  // État pour gérer l'affichage du chargement
   const [loading, setLoading] = useState(true);
+
+  // État pour gérer la slide actuelle du carousel
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Récupération des données d'authentification
   const { currentUser, isAuthenticated } = useAuth();
 
-  // Images du carousel
+  // Tableau des images et textes pour le carousel
   const carouselImages = [
     {
       id: 1,
-      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image:
+        "https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
       title: "Produits Frais de la Ferme",
-      description: "Découvrez des produits agricoles frais directement de nos producteurs locaux"
+      description:
+        "Découvrez des produits agricoles frais directement de nos producteurs locaux",
     },
     {
       id: 2,
-      image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image:
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
       title: "Circuit Court Garanti",
-      description: "Soutenez l'agriculture locale avec des produits de saison et de qualité"
+      description:
+        "Soutenez l'agriculture locale avec des produits de saison et de qualité",
     },
     {
       id: 3,
-      image: "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image:
+        "https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
       title: "Livraison Rapide",
-      description: "Recevez vos produits en 24h-48h, cueillis à maturité pour préserver leurs saveurs"
+      description:
+        "Recevez vos produits en 24h-48h, cueillis à maturité pour préserver leurs saveurs",
     },
     {
       id: 4,
-      image: "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+      image:
+        "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
       title: "Agriculture Durable",
-      description: "Des pratiques respectueuses de l'environnement pour une alimentation saine"
-    }
+      description:
+        "Des pratiques respectueuses de l'environnement pour une alimentation saine",
+    },
   ];
 
+  // ===== EFFET POUR CHARGER LES PRODUITS AU DÉMARRAGE =====
   useEffect(() => {
     const loadProducts = () => {
       try {
+        // Récupère tous les produits depuis le service
         const allProducts = productService.getProducts();
-        // Filtrer les produits valides et prendre les 6 premiers
-        const validProducts = allProducts.filter(product => product && product.id).slice(0, 6);
+        // Filtre les produits valides et prend les 6 premiers
+        const validProducts = allProducts
+          .filter((product) => product && product.id)
+          .slice(0, 6);
+        // Met à jour l'état avec les produits valides
         setProducts(validProducts);
       } catch (error) {
+        // En cas d'erreur, on vide la liste des produits
         console.error("Erreur lors du chargement des produits:", error);
         setProducts([]);
       } finally {
+        // Arrête le chargement dans tous les cas
         setLoading(false);
       }
     };
 
     loadProducts();
-  }, []);
+  }, []); // Le tableau vide [] signifie que cet effet ne s'exécute qu'une fois au démarrage
 
-  // Auto-slide du carousel
+  // ===== EFFET POUR LE CAROUSEL AUTO =====
   useEffect(() => {
+    // Crée un timer qui change de slide toutes les 5 secondes
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
-    }, 5000); // Change toutes les 5 secondes
+    }, 5000); // 5000 millisecondes = 5 secondes
 
+    // Nettoyage : supprime le timer quand le composant est démonté
     return () => clearInterval(timer);
-  }, [carouselImages.length]);
+  }, [carouselImages.length]); // Dépend de la longueur du carousel
 
+  // ===== FONCTIONS DE NAVIGATION DU CAROUSEL =====
+
+  // Aller à une slide spécifique
   const goToSlide = (index) => {
     setCurrentSlide(index);
   };
 
+  // Slide suivante
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
   };
 
+  // Slide précédente
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + carouselImages.length) % carouselImages.length);
+    setCurrentSlide(
+      (prev) => (prev - 1 + carouselImages.length) % carouselImages.length
+    );
   };
 
+  // ===== AFFICHAGE PENDANT LE CHARGEMENT =====
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Chargement des produits...</p>
+      // Écran de chargement stylisé
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+        {/* Spinner de chargement */}
+        <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-600 text-lg">Chargement des produits...</p>
       </div>
     );
   }
 
+  // ===== RENDU PRINCIPAL DE LA PAGE D'ACCUEIL =====
   return (
-    <div className="home-page">
-      {/* Carousel Hero Section */}
-      <section className="hero-carousel">
-        <div className="carousel-container">
+    <div className="min-h-screen bg-white">
+      {/* === SECTION HERO AVEC CAROUSEL === */}
+      <section className="relative h-screen overflow-hidden">
+        <div className="relative h-full">
+          {/* Boucle sur toutes les images du carousel */}
           {carouselImages.map((slide, index) => (
             <div
               key={slide.id}
-              className={`carousel-slide ${index === currentSlide ? 'active' : ''}`}
-              style={{ backgroundImage: `url(${slide.image})` }}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide ? "opacity-100" : "opacity-0"
+              }`}
             >
-              <div className="carousel-overlay"></div>
-              <div className="carousel-content">
-                <h1 className="carousel-title">{slide.title}</h1>
-                <p className="carousel-description">{slide.description}</p>
-                <div className="carousel-actions">
-                  {!isAuthenticated() && (
-                    <Link to="/register" className="carousel-btn primary">
-                      Rejoindre AgriEcom
+              {/* Image de fond */}
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: `url(${slide.image})` }}
+              ></div>
+
+              {/* Overlay sombre pour mieux lire le texte */}
+              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+
+              {/* Contenu texte superposé */}
+              <div className="relative h-full flex items-center justify-center text-center text-white px-4">
+                <div className="max-w-4xl">
+                  <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+                    {slide.title}
+                  </h1>
+                  <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto leading-relaxed">
+                    {slide.description}
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {/* Affiche le bouton "Rejoindre" seulement si non connecté */}
+                    {!isAuthenticated() && (
+                      <Link
+                        to="/register"
+                        className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+                      >
+                        Rejoindre AgriEcom
+                      </Link>
+                    )}
+                    <Link
+                      to="/products"
+                      className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border border-white border-opacity-30"
+                    >
+                      Découvrir les produits
                     </Link>
-                  )}
-                  <Link to="/products" className="carousel-btn secondary">
-                    Découvrir les produits
-                  </Link>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
-          
-          {/* Contrôles du carousel */}
-          <button className="carousel-control prev" onClick={prevSlide}>
+
+          {/* Boutons de navigation du carousel */}
+          <button
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-300 backdrop-blur-sm"
+            onClick={prevSlide}
+          >
             ‹
           </button>
-          <button className="carousel-control next" onClick={nextSlide}>
+          <button
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold transition-all duration-300 backdrop-blur-sm"
+            onClick={nextSlide}
+          >
             ›
           </button>
 
-          {/* Indicateurs de slide */}
-          <div className="carousel-indicators">
+          {/* Indicateurs de slide (points en bas) */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-3">
             {carouselImages.map((_, index) => (
               <button
                 key={index}
-                className={`indicator ${index === currentSlide ? 'active' : ''}`}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentSlide
+                    ? "bg-white scale-125"
+                    : "bg-white bg-opacity-50 hover:bg-opacity-75"
+                }`}
                 onClick={() => goToSlide(index)}
               />
             ))}
@@ -136,60 +209,91 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Statistiques */}
-      <section className="stats-section">
-        <div className="stats-container">
-          <div className="stat-item">
-            <div className="stat-icon">🌱</div>
-            <div className="stat-number">{products.length}+</div>
-            <div className="stat-label">Produits Frais</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-icon">👨‍🌾</div>
-            <div className="stat-number">100%</div>
-            <div className="stat-label">Producteurs Locaux</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-icon">🚚</div>
-            <div className="stat-number">24h</div>
-            <div className="stat-label">Livraison Rapide</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-icon">⭐</div>
-            <div className="stat-number">5/5</div>
-            <div className="stat-label">Satisfaction Client</div>
+      {/* === SECTION STATISTIQUES === */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {/* Carte statistique 1 */}
+            <div className="text-center">
+              <div className="text-4xl mb-4">🌱</div>
+              <div className="text-3xl font-bold text-gray-800 mb-2">
+                {products.length}+
+              </div>
+              <div className="text-gray-600 font-medium">Produits Frais</div>
+            </div>
+
+            {/* Carte statistique 2 */}
+            <div className="text-center">
+              <div className="text-4xl mb-4">👨‍🌾</div>
+              <div className="text-3xl font-bold text-gray-800 mb-2">100%</div>
+              <div className="text-gray-600 font-medium">
+                Producteurs Locaux
+              </div>
+            </div>
+
+            {/* Carte statistique 3 */}
+            <div className="text-center">
+              <div className="text-4xl mb-4">🚚</div>
+              <div className="text-3xl font-bold text-gray-800 mb-2">24h</div>
+              <div className="text-gray-600 font-medium">Livraison Rapide</div>
+            </div>
+
+            {/* Carte statistique 4 */}
+            <div className="text-center">
+              <div className="text-4xl mb-4">⭐</div>
+              <div className="text-3xl font-bold text-gray-800 mb-2">5/5</div>
+              <div className="text-gray-600 font-medium">
+                Satisfaction Client
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Section Produits en Vedette */}
-      <section className="featured-products-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">Nos Produits Frais</h2>
-            <p className="section-subtitle">
-              Découvrez une sélection de produits frais directement issus de nos producteurs partenaires
+      {/* === SECTION PRODUITS EN VEDETTE === */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* En-tête de section */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+              Nos Produits Frais
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Découvrez une sélection de produits frais directement issus de nos
+              producteurs partenaires
             </p>
           </div>
 
+          {/* Affichage conditionnel : produits ou message vide */}
           {products.length === 0 ? (
-            <div className="empty-products">
-              <div className="empty-icon">🌾</div>
-              <h3>En attente de nouveaux produits</h3>
-              <p>Nos producteurs préparent de nouvelles récoltes</p>
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🌾</div>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">
+                En attente de nouveaux produits
+              </h3>
+              <p className="text-gray-600">
+                Nos producteurs préparent de nouvelles récoltes
+              </p>
             </div>
           ) : (
             <>
-              <div className="products-grid">
+              {/* Grille des produits */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-              
-              <div className="view-all-container">
-                <Link to="/products" className="view-all-btn">
+
+              {/* Bouton "Voir tous" */}
+              <div className="text-center">
+                <Link
+                  to="/products"
+                  className="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 group"
+                >
                   Voir tous les produits
-                  <span className="btn-arrow">→</span>
+                  <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">
+                    →
+                  </span>
                 </Link>
               </div>
             </>
@@ -197,53 +301,89 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Section Avantages */}
-      <section className="benefits-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">Pourquoi choisir AgriEcom ?</h2>
+      {/* === SECTION AVANTAGES === */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* En-tête de section */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+              Pourquoi choisir AgriEcom ?
+            </h2>
           </div>
-          
-          <div className="benefits-grid">
-            <div className="benefit-card">
-              <div className="benefit-icon">🛒</div>
-              <h3>Achat Direct</h3>
-              <p>Achetez directement auprès des producteurs sans intermédiaire</p>
+
+          {/* Grille des avantages */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Carte avantage 1 */}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center hover:shadow-lg transition-shadow duration-300">
+              <div className="text-4xl mb-4">🛒</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                Achat Direct
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                Achetez directement auprès des producteurs sans intermédiaire
+              </p>
             </div>
-            
-            <div className="benefit-card">
-              <div className="benefit-icon">🌿</div>
-              <h3>Produits Qualité</h3>
-              <p>Des produits frais, de saison et issus de l'agriculture responsable</p>
+
+            {/* Carte avantage 2 */}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center hover:shadow-lg transition-shadow duration-300">
+              <div className="text-4xl mb-4">🌿</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                Produits Qualité
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                Des produits frais, de saison et issus de l'agriculture
+                responsable
+              </p>
             </div>
-            
-            <div className="benefit-card">
-              <div className="benefit-icon">💚</div>
-              <h3>Circuit Court</h3>
-              <p>Soutenez l'économie locale et réduisez l'impact environnemental</p>
+
+            {/* Carte avantage 3 */}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center hover:shadow-lg transition-shadow duration-300">
+              <div className="text-4xl mb-4">💚</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                Circuit Court
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                Soutenez l'économie locale et réduisez l'impact environnemental
+              </p>
             </div>
-            
-            <div className="benefit-card">
-              <div className="benefit-icon">🛡️</div>
-              <h3>Paiement Sécurisé</h3>
-              <p>Transactions 100% sécurisées avec suivi de commande</p>
+
+            {/* Carte avantage 4 */}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center hover:shadow-lg transition-shadow duration-300">
+              <div className="text-4xl mb-4">🛡️</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">
+                Paiement Sécurisé
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                Transactions 100% sécurisées avec suivi de commande
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* === SECTION APPEL À L'ACTION (seulement si non connecté) === */}
       {!isAuthenticated() && (
-        <section className="cta-section">
-          <div className="cta-container">
-            <div className="cta-content">
-              <h2>Prêt à découvrir le goût du vrai ?</h2>
-              <p>Rejoignez notre communauté de producteurs et consommateurs engagés</p>
-              <div className="cta-buttons">
-                <Link to="/register" className="cta-btn primary">
+        <section className="py-20 bg-green-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center text-white">
+              <h2 className="text-4xl font-bold mb-4">
+                Prêt à découvrir le goût du vrai ?
+              </h2>
+              <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
+                Rejoignez notre communauté de producteurs et consommateurs
+                engagés
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  to="/register"
+                  className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                >
                   Créer mon compte
                 </Link>
-                <Link to="/products" className="cta-btn secondary">
+                <Link
+                  to="/products"
+                  className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-green-600 px-8 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
+                >
                   Voir les produits
                 </Link>
               </div>
@@ -255,4 +395,5 @@ const Home = () => {
   );
 };
 
+// Exportation du composant pour pouvoir l'utiliser dans d'autres fichiers
 export default Home;
