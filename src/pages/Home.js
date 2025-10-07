@@ -209,6 +209,65 @@ const Home = () => {
         </div>
       </section>
 
+      {/* === SECTION CATÉGORIES === */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Titre de section */}
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+              Nos Catégories de Produits
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Explorez nos différentes catégories de produits frais, locaux et
+              de qualité.
+            </p>
+          </div>
+
+          {/* Grille de catégories */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            {/* Carte catégorie */}
+            {[
+              {
+                name: "Légumes",
+                image:
+                  "https://tse2.mm.bing.net/th/id/OIP.FFxXKjWfDMH9ewFmyGFfkwHaE8?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3",
+              },
+              {
+                name: "Fruits",
+                image:
+                  "https://www.gastronomiac.com/wp/wp-content/uploads/2021/08/Fruits.jpg",
+              },
+              {
+                name: "Grains",
+                image:
+                  "https://tse1.explicit.bing.net/th/id/OIP.8Gz88cqqE-xdQrSvtn6yTgHaDa?cb=12&rs=1&pid=ImgDetMain&o=7&rm=3",
+              },
+            ].map((category, index) => (
+              <Link
+                key={index}
+                to={`/products?category=${category.name.toLowerCase()}`}
+                className="relative group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                {/* Image de fond */}
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                {/* Overlay foncé */}
+                <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-50 transition-all duration-300"></div>
+                {/* Texte de la catégorie */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <h3 className="text-white text-2xl font-bold drop-shadow-lg text-center">
+                    {category.name}
+                  </h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* === SECTION STATISTIQUES === */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

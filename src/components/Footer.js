@@ -1,108 +1,117 @@
-// Importation de la bibliothèque React (nécessaire pour créer des composants)
 import React from "react";
-
-// Importation du composant Link de react-router-dom (pour la navigation entre les pages)
 import { Link } from "react-router-dom";
+import { Facebook, Instagram } from "lucide-react";
 
-// Définition du composant Footer (pied de page)
 const Footer = () => {
-  // Le composant retourne le JSX (structure HTML) qui sera affiché
   return (
-    // Footer avec fond vert agricole, texte blanc et padding - ajout de mt-auto pour pousser le footer en bas
-    <footer className="bg-green-800 text-white py-8 mt-auto">
-      {/* Conteneur principal avec largeur maximale et centrage */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Grille responsive pour les sections - disposition colonne sur mobile, ligne sur desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          
-          {/* === PREMIÈRE SECTION - Logo et slogan === */}
-          <div className="flex flex-col">
-            {/* Titre avec taille de texte et marge */}
-            <h2 className="text-2xl font-bold mb-4 flex items-center">
-              <span className="mr-2">🌱</span>
-              AgriEcom
-            </h2>
-            {/* Slogan avec texte plus petit et ligne de hauteur confortable */}
-            <p className="text-green-100 leading-relaxed max-w-md">
-              Mettre en relation producteurs, éleveurs et acheteurs pour une
-              agriculture plus connectée.
+    <footer className="bg-green-900 text-white py-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        {/* === SECTION PRINCIPALE === */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+          {/* === 1️⃣ À PROPOS === */}
+          <div>
+            <h3 className="text-lg font-bold mb-4 uppercase">À PROPOS</h3>
+            <p className="text-sm text-gray-100 leading-relaxed">
+              <strong>AgroBusiness</strong>
+              <br />
+              Agro Sénégal LP est une plateforme agroalimentaire, portée vers
+              l’échange ainsi que la vente des produits agroalimentaires.
             </p>
           </div>
 
-          {/* === DEUXIÈME SECTION - Liens de navigation === */}
-          <div className="flex flex-col">
-            {/* Titre de section avec marge et taille de texte */}
-            <h3 className="text-lg font-semibold mb-4">Liens utiles</h3>
-            {/* Liste des liens sans puces et avec espacement */}
-            <ul className="space-y-3">
-              {/* Chaque lien avec effet au survol et transition fluide */}
-              {[
-                { to: "/", label: "Accueil" },
-                { to: "/products", label: "Produits" },
-                { to: "/cart", label: "Panier" },
-                { to: "/profile", label: "Mon profil" }
-              ].map((link) => (
-                <li key={link.to}>
-                  <Link
-                    to={link.to}
-                    className="text-green-100 hover:text-white transition-colors duration-200 hover:translate-x-1 inline-block"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+          {/* === 2️⃣ INFOS LÉGALES === */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Infos légales</h3>
+            <ul className="space-y-2 text-sm text-gray-100">
+              <li>
+                <Link to="/mentions-legales" className="hover:text-green-300">
+                  Mentions légales
+                </Link>
+              </li>
+              <li>
+                <Link to="/conditions" className="hover:text-green-300">
+                  Conditions générales de vente
+                </Link>
+              </li>
+              <li>
+                <Link to="/paiement" className="hover:text-green-300">
+                  Moyens de paiement
+                </Link>
+              </li>
+              <li>
+                <Link to="/bons-achat" className="hover:text-green-300">
+                  Utilisation de bons d’achat
+                </Link>
+              </li>
+              <li>
+                <Link to="/plan-vigilance" className="hover:text-green-300">
+                  Plan de vigilance
+                </Link>
+              </li>
+              <li>
+                <Link to="/confidentialite" className="hover:text-green-300">
+                  Politique de confidentialité
+                </Link>
+              </li>
+              <li>
+                <Link to="/alerte-anonyme" className="hover:text-green-300">
+                  Alerte anonyme
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* === TROISIÈME SECTION - Informations de contact === */}
-          <div className="flex flex-col">
-            {/* Titre de section */}
-            <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            {/* Conteneur des informations de contact avec espacement */}
-            <div className="space-y-3 text-green-100">
-              {/* Email avec lien mailto */}
-              <div className="flex items-start">
-                <span className="font-medium min-w-20">Email :</span>
-                <a
-                  href="mailto:contact@agriecom.com"
-                  className="hover:text-white transition-colors duration-200 underline ml-2"
-                >
-                  contact@agriecom.com
-                </a>
-              </div>
-              {/* Numéro de téléphone */}
-              <div className="flex items-center">
-                <span className="font-medium min-w-20">Téléphone :</span>
-                <span className="ml-2">+221 77 000 00 00</span>
-              </div>
-              {/* Adresse physique */}
-              <div className="flex items-start">
-                <span className="font-medium min-w-20">Adresse :</span>
-                <span className="ml-2">Thiès, Sénégal</span>
-              </div>
+          {/* === 3️⃣ NOS SERVICES === */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Nos services</h3>
+            <ul className="space-y-2 text-sm text-gray-100">
+              <li>Sama Kalpé Auchan</li>
+              <li>Service après-vente</li>
+            </ul>
+          </div>
+
+          {/* === 4️⃣ NOUS SUIVRE === */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Nous suivre</h3>
+            <div className="flex items-center gap-4">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noreferrer"
+                className="bg-white text-green-900 p-2 rounded-full hover:scale-110 transition-transform"
+              >
+                <Facebook size={20} />
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                className="bg-white text-green-900 p-2 rounded-full hover:scale-110 transition-transform"
+              >
+                <Instagram size={20} />
+              </a>
             </div>
+          </div>
+
+          {/* === 5️⃣ BESOIN D’AIDE ? === */}
+          <div className="flex flex-col justify-center">
+            <h3 className="text-lg font-bold mb-3">Besoin d’aide ?</h3>
+            <Link
+              to="/contact"
+              className="bg-white text-green-900 font-bold text-sm px-5 py-3 rounded-lg shadow hover:bg-gray-100 transition-all w-max"
+            >
+              Nous contacter
+            </Link>
           </div>
         </div>
 
-        {/* === PARTIE INFÉRIEURE DU FOOTER - Copyright === */}
-        <div className="border-t border-green-700 pt-6 text-center text-green-200">
-          {/* 
-            Ligne de copyright centrée avec bordure supérieure
-            new Date().getFullYear() - récupère l'année actuelle automatiquement
-          */}
-          <p className="text-sm">
-            © {new Date().getFullYear()} AgriEcom - Tous droits réservés.
-          </p>
-          {/* Ajout d'un texte supplémentaire pour les mentions légales */}
-          <p className="text-xs mt-2 text-green-300">
-            Plateforme de mise en relation agricole
-          </p>
+        {/* === LIGNE DE COPYRIGHT === */}
+        <div className="border-t border-green-700 mt-10 pt-4 text-center text-sm text-green-200">
+          © {new Date().getFullYear()} AgroBusiness – Tous droits réservés.
         </div>
       </div>
     </footer>
   );
 };
 
-// Exportation du composant pour pouvoir l'utiliser ailleurs dans l'application
 export default Footer;

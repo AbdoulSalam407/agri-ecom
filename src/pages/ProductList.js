@@ -1,100 +1,83 @@
-// Importation de React et des hooks useEffect et useState
+// Importation de React et des hooks
 import React, { useEffect, useState } from "react";
 
-// Importation des composants de navigation React Router
-import { Link } from "react-router-dom";
+// Importation du composant Link et useLocation pour lire les paramètres d’URL
+import { Link, useLocation } from "react-router-dom";
 
-// Importation du composant ProductCard pour afficher chaque produit
+// Importation du composant ProductCard
 import ProductCard from "../components/ProductCard";
 
-// Importation du service pour gérer les produits
+// Importation du service produit
 import { productService } from "../services/productService";
 
-// Importation des données initiales des produits depuis un fichier JSON
+// Importation des données initiales
 import initialProducts from "../data/products.json";
 
-// Définition du composant ProductList (page liste des produits)
 const ProductList = () => {
-  // ===== ÉTATS POUR GÉRER LES DONNÉES ET L'INTERFACE =====
-
-  // État pour stocker la liste des produits à afficher
+  // ====== États ======
   const [products, setProducts] = useState([]);
-
-  // État pour gérer l'affichage du chargement
   const [loading, setLoading] = useState(true);
-
-  // État pour stocker le terme de recherche
   const [searchTerm, setSearchTerm] = useState("");
-
-  // État pour stocker la catégorie sélectionnée
   const [selectedCategory, setSelectedCategory] = useState("");
 
-  // ===== EFFET POUR CHARGER LES PRODUITS AU DÉMARRAGE =====
+  // Récupération du paramètre de catégorie dans l’URL
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get("category");
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [location]);
+
+  // ====== Chargement des produits ======
   useEffect(() => {
     loadProducts();
-  }, []); // Le tableau vide [] signifie que cet effet ne s'exécute qu'une fois au démarrage
+  }, [searchTerm, selectedCategory]);
 
-  // ===== FONCTION POUR CHARGER LES PRODUITS =====
   const loadProducts = () => {
     setLoading(true);
-
-    // Récupère tous les produits depuis le service
-    let productsData = productService.getProducts();
-
-    // Applique les filtres si un terme de recherche ou une catégorie est sélectionné
-    if (searchTerm || selectedCategory) {
-      productsData = productService.searchProducts(
-        searchTerm,
-        selectedCategory
-      );
-    }
-
-    // Met à jour l'état avec les produits filtrés
+    let productsData = productService.searchProducts(
+      searchTerm,
+      selectedCategory
+    );
     setProducts(productsData);
     setLoading(false);
   };
 
-  // ===== FONCTION POUR LANCER LA RECHERCHE =====
+  // ====== Actions ======
   const handleSearch = (e) => {
-    // Empêche le rechargement de la page
     e.preventDefault();
-    // Relance le chargement des produits avec les filtres
     loadProducts();
   };
 
-  // ===== FONCTION POUR RÉINITIALISER LES FILTRES =====
   const handleReset = () => {
-    // Réinitialise les états de recherche
     setSearchTerm("");
     setSelectedCategory("");
-    // Recharge tous les produits sans filtre
     loadProducts();
   };
 
-  // ===== FONCTION POUR FORCER LA RÉINITIALISATION DES DONNÉES =====
   const forceResetProducts = () => {
-    // Sauvegarde les produits initiaux dans le service
     productService.saveProducts(initialProducts);
-    // Recharge les produits
     loadProducts();
   };
 
-  // ===== AFFICHAGE PENDANT LE CHARGEMENT =====
+  // ====== Affichage pendant le chargement ======
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        {/* Spinner de chargement */}
         <div className="w-16 h-16 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mb-4"></div>
         <p className="text-gray-600 text-lg">Chargement des produits...</p>
       </div>
     );
   }
 
-  // ===== RENDU PRINCIPAL DU COMPOSANT =====
+  // ====== Rendu principal ======
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* === EN-TÊTE DE LA PAGE === */}
+        {/* === EN-TÊTE === */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             Nos Produits Frais
@@ -110,7 +93,6 @@ const ProductList = () => {
           <form onSubmit={handleSearch} className="space-y-6">
             {/* Groupe de recherche */}
             <div className="flex flex-col md:flex-row gap-4">
-              {/* Champ de recherche */}
               <div className="flex-grow">
                 <input
                   type="text"
@@ -121,51 +103,41 @@ const ProductList = () => {
                 />
               </div>
 
-              {/* Bouton de recherche */}
               <button
                 type="submit"
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center gap-2 whitespace-nowrap"
               >
-                <span>🔍</span>
-                Rechercher
+                <span>🔍</span> Rechercher
               </button>
             </div>
 
             {/* Groupe de filtres */}
             <div className="flex flex-col md:flex-row gap-4 items-center">
-              {/* Sélecteur de catégorie */}
               <div className="flex-grow">
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
                 >
                   <option value="">🥕 Toutes les catégories</option>
                   <option value="légumes">🥕 Légumes</option>
                   <option value="fruits">🍎 Fruits</option>
-                  <option value="viandes">🥩 Viandes</option>
-                  <option value="produits laitiers">
-                    🧀 Produits laitiers
-                  </option>
-                  <option value="œufs">🥚 Œufs</option>
-                  <option value="céréales">🌾 Céréales</option>
+                  <option value="viandes">🥩 Grains</option>
                 </select>
               </div>
 
-              {/* Bouton réinitialiser */}
               <button
                 type="button"
                 onClick={handleReset}
                 className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center gap-2 whitespace-nowrap"
               >
-                <span>🔄</span>
-                Réinitialiser
+                <span>🔄</span> Réinitialiser
               </button>
             </div>
           </form>
         </div>
 
-        {/* === MESSAGE D'ALERTE SI PROBLÈME DE DONNÉES === */}
+        {/* === MESSAGE D’ALERTE === */}
         {products.length !== initialProducts.length &&
           !searchTerm &&
           !selectedCategory && (
@@ -195,7 +167,6 @@ const ProductList = () => {
 
         {/* === INFORMATIONS SUR LES RÉSULTATS === */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-          {/* Compteur de résultats */}
           <p className="text-gray-700 font-medium">
             {products.length} produit(s) trouvé(s)
             {searchTerm && (
@@ -206,19 +177,15 @@ const ProductList = () => {
             )}
           </p>
 
-          {/* Lien vers le panier */}
           <Link
             to="/cart"
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 flex items-center gap-2 whitespace-nowrap self-start md:self-auto"
           >
-            <span>🛒</span>
-            Voir mon panier
+            <span>🛒</span> Voir mon panier
           </Link>
         </div>
 
         {/* === GRILLE DES PRODUITS === */}
-
-        {/* Si aucun produit n'est trouvé */}
         {products.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-200">
             <div className="text-6xl mb-4">🌱</div>
@@ -231,7 +198,6 @@ const ProductList = () => {
                 : "Nos producteurs préparent de nouveaux produits frais"}
             </p>
 
-            {/* Bouton pour réinitialiser si des filtres sont actifs */}
             {(searchTerm || selectedCategory) && (
               <button
                 onClick={handleReset}
@@ -242,16 +208,13 @@ const ProductList = () => {
             )}
           </div>
         ) : (
-          /* === AFFICHAGE DE LA GRILLE DES PRODUITS === */
           <>
-            {/* Grille des produits */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
 
-            {/* Section de fin de liste */}
             <div className="text-center bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
               <p className="text-gray-600 mb-4 text-lg">
                 {products.length === 1
@@ -263,8 +226,7 @@ const ProductList = () => {
                   to="/"
                   className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 justify-center"
                 >
-                  <span>←</span>
-                  Retour à l'accueil
+                  <span>←</span> Retour à l'accueil
                 </Link>
                 <button
                   onClick={handleReset}
@@ -281,5 +243,4 @@ const ProductList = () => {
   );
 };
 
-// Exportation du composant pour pouvoir l'utiliser dans d'autres fichiers
 export default ProductList;

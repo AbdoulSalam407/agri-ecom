@@ -9,6 +9,10 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import AdminDashboard from "./pages/AdminDashboard";
 import MyProducts from "./pages/MyProducts";
+import Livraison from "./components/Livraison";
+import Payment from "./components/Payment";
+import Confirmation from "./components/Confirmation";
+import About  from "./pages/About";
 
 const AppRoutes = () => {
   return (
@@ -22,6 +26,10 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/my-products" element={<MyProducts />} />
+      <Route path="/livraison" element={<Livraison />} />
+      <Route path="/paiement" element={<Payment />} />
+      <Route path="/confirmation" element={<Confirmation />} />
+      <Route path="/about" element={<About />} />
     </Routes>
   );
 };

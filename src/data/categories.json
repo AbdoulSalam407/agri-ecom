@@ -1,14 +1,1 @@
-[
-  "légumes",
-  "fruits",
-  "céréales",
-  "viandes",
-  "produits laitiers",
-  "œufs",
-  "volailles",
-  "poissons",
-  "miels",
-  "épices",
-  "boissons",
-  "autres"
-]
+["légumes", "fruits", "grains"]
