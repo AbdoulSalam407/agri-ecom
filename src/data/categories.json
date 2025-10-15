@@ -1,14 +1,16 @@
-[
-  "légumes",
-  "fruits",
-  "céréales",
-  "viandes",
-  "produits laitiers",
-  "œufs",
-  "volailles",
-  "poissons",
-  "miels",
-  "épices",
-  "boissons",
-  "autres"
-]
+{
+  "categories": [
+    {
+      "id": "1",
+      "name": "légumes"
+    },
+    {
+      "id": "2",
+      "name": "fruits"
+    },
+    {
+      "id": "3",
+      "name": "grains"
+    }
+  ]
+}
