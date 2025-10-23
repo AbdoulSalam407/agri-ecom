@@ -1,7 +1,7 @@
 import type { Product, ProductApproval } from "../types";
 import { approvalService } from "./approvalService";
 
-const API_URL = "http://localhost:5000/products";
+const API_URL = "https://agrobusiness-api.onrender.com/products";
 
 const fetchAPI = async <T>(
   url: string,
@@ -23,6 +23,7 @@ const fetchAPI = async <T>(
 };
 
 export const productService = {
+  // ✅ Récupérer tous les produits
   getProducts: async (): Promise<Product[]> => {
     return await fetchAPI<Product[]>(API_URL);
   },
@@ -41,6 +42,7 @@ export const productService = {
     return products.filter((product) => product.sellerId === userId);
   },
 
+  // ✅ Ajouter un produit (avec approbation)
   addProduct: async (
     productData: Partial<Product>
   ): Promise<ProductApproval> => {
@@ -48,7 +50,6 @@ export const productService = {
       throw new Error("ID du vendeur requis");
     }
 
-    // Pour les producteurs, créer une demande d'approbation
     const approval = await approvalService.createProductApproval({
       productId: `temp-${Date.now()}`,
       action: "create",
@@ -67,14 +68,35 @@ export const productService = {
     return approval;
   },
 
+  // ✅ Mettre à jour un produit (version corrigée)
   updateProduct: async (
     id: string,
-    productData: Partial<Product>
-  ): Promise<ProductApproval> => {
-    // Récupérer le produit existant pour vérifier le propriétaire
+    productData: Partial<Product>,
+    isAdmin: boolean = false
+  ): Promise<ProductApproval | Product> => {
     const existingProduct = await productService.getProductById(id);
 
-    // Pour les producteurs, créer une demande d'approbation
+    if (!existingProduct) {
+      throw new Error("Produit introuvable");
+    }
+
+    if (isAdmin) {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...productData,
+          updatedAt: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok)
+        throw new Error("Erreur lors de la mise à jour directe du produit");
+
+      return response.json();
+    }
+
+    // 🔹 Sinon → création d'une demande d’approbation (pour producteurs)
     const approval = await approvalService.createProductApproval({
       productId: id,
       action: "update",
@@ -91,11 +113,10 @@ export const productService = {
     return approval;
   },
 
+  // ✅ Supprimer un produit (demande d’approbation)
   deleteProduct: async (id: string): Promise<ProductApproval> => {
-    // Récupérer le produit existant pour vérifier le propriétaire
     const existingProduct = await productService.getProductById(id);
 
-    // Pour les producteurs, créer une demande d'approbation
     const approval = await approvalService.createProductApproval({
       productId: id,
       action: "delete",
@@ -108,15 +129,14 @@ export const productService = {
     return approval;
   },
 
-  // Méthode pour les admins pour exécuter les actions approuvées
+  // ✅ Exécuter une action approuvée (admin)
   executeProductAction: async (
     approval: ProductApproval
   ): Promise<Product | boolean> => {
     switch (approval.action) {
       case "create": {
-        if (!approval.productData) {
+        if (!approval.productData)
           throw new Error("Données du produit manquantes");
-        }
 
         const productToCreate = {
           ...approval.productData,
@@ -133,12 +153,13 @@ export const productService = {
 
         if (!response.ok)
           throw new Error("Erreur lors de la création du produit");
+
         return response.json();
       }
+
       case "update": {
-        if (!approval.productData) {
+        if (!approval.productData)
           throw new Error("Données de mise à jour manquantes");
-        }
 
         const updateResponse = await fetch(`${API_URL}/${approval.productId}`, {
           method: "PATCH",
@@ -148,30 +169,27 @@ export const productService = {
 
         if (!updateResponse.ok)
           throw new Error("Erreur lors de la mise à jour du produit");
+
         return updateResponse.json();
       }
-      case "delete":
-        {
-          const deleteResponse = await fetch(
-            `${API_URL}/${approval.productId}`,
-            {
-              method: "DELETE",
-            }
-          );
 
-          if (!deleteResponse.ok)
-            throw new Error("Erreur lors de la suppression du produit");
-          return true;
-        }
-        throw new Error("Erreur lors de la suppression du produit");
+      case "delete": {
+        const deleteResponse = await fetch(`${API_URL}/${approval.productId}`, {
+          method: "DELETE",
+        });
+
+        if (!deleteResponse.ok)
+          throw new Error("Erreur lors de la suppression du produit");
+
         return true;
+      }
 
       default:
         throw new Error("Action non supportée");
     }
   },
 
-  // Méthodes directes pour les admins (sans approbation)
+  // ✅ Méthodes directes pour les admins
   adminAddProduct: async (productData: Partial<Product>): Promise<Product> => {
     const response = await fetch(API_URL, {
       method: "POST",
@@ -211,6 +229,7 @@ export const productService = {
     return true;
   },
 
+  // ✅ Mise à jour du statut (approbation)
   updateProductStatus: async (
     productId: string,
     status: string
