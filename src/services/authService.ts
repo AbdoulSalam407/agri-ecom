@@ -1,7 +1,7 @@
 // services/authService.ts
 import type { User } from "../types";
 
-const API_URL = "http://localhost:5000/users";
+const API_URL = "https://agrobusiness-api.onrender.com/users";
 
 export const authService = {
   login: async (email: string, password: string): Promise<User> => {

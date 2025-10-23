@@ -1,6 +1,6 @@
 import type { ProductApproval, OrderApproval, ApprovalStats } from "../types";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://agrobusiness-api.onrender.com";
 
 const fetchAPI = async <T>(
   url: string,
