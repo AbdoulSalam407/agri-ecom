@@ -18,7 +18,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
   isOpen,
   onClose,
   product,
-  isAdmin = false,
   onProductUpdated,
 }) => {
   const [formData, setFormData] = useState({
