@@ -35,7 +35,7 @@ const Home: React.FC = () => {
     },
     {
       id: 2,
-      image: "src/assets/imageCarousel/image1.jpg",
+      image: "imageCarousel/image1.jpg",
       title: "Circuit Court Garanti",
       description: "Soutenez l'agriculture locale avec des produits de qualité",
       badge: "🔄 Circuit Court",
@@ -43,7 +43,7 @@ const Home: React.FC = () => {
     },
     {
       id: 3,
-      image: "src/assets/imageCarousel/bb.jpg",
+      image: "imageCarousel/bb.jpg",
       title: "Produits Frais de la Ferme",
       description:
         "Des produits agricoles frais directement de nos producteurs locaux",
@@ -52,7 +52,7 @@ const Home: React.FC = () => {
     },
     {
       id: 4,
-      image: "src/assets/imageCarousel/image.jpg",
+      image: "imageCarousel/image.jpg",
       title: "Produits Frais de la Ferme",
       description:
         "Des produits agricoles frais directement de nos producteurs locaux",
@@ -61,7 +61,7 @@ const Home: React.FC = () => {
     },
     {
       id: 5,
-      image: "src/assets/imageCarousel/image2.jpg",
+      image: "imageCarousel/image2.jpg",
       title: "Produits Frais de la Ferme",
       description:
         "Des produits agricoles frais directement de nos producteurs locaux",
