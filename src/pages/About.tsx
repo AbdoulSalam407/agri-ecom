@@ -55,7 +55,7 @@ const About: React.FC = () => {
       role: "Co-fondateur & CTO",
       description:
         "Ingénieur passionné par le développement technologique et l’innovation numérique, engagé dans la transformation digitale du secteur agricole. Technologies émergentes : Intelligence Artificielle, Big Data, innovation appliquée. Programmation & développement : Conception et déploiement de solutions logicielles. Mathématiques appliquées : Algèbre linéaire, statistiques et modélisation pour l’IA. Veille technologique : Suivi actif des tendances en Data Science et Intelligence Artificielle.",
-      image: "./src/assets/image/co-fondateur.png",
+      image: "co-fondateur.png",
       specialties: ["Développement web", "Data Engineering", "Data Science"],
     },
     {
@@ -63,7 +63,7 @@ const About: React.FC = () => {
       role: "Co-fondatrice & CEO",
       description:
         "Visionnaire de l'agriculture digitale, elle combine expertise business et passion pour l'innovation agricole.",
-      image: "./src/assets/image/fatou.jpg",
+      image: "co-fondatrice.jpg",
       specialties: ["Développement", "Stratégie", "Marketing", "Relations"],
     },
   ];

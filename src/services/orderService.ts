@@ -2,7 +2,7 @@
 import type { Order, OrderItem, OrderApproval } from "../types";
 import { approvalService } from "./approvalService";
 
-const API_URL = "https://agrobusiness-api.onrender.com/orders";
+const API_URL = "https://api-backend-1-0.onrender.com/orders";
 
 const fetchAPI = async <T>(
   url: string,

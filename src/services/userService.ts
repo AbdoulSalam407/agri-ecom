@@ -1,6 +1,6 @@
 import type { User } from "../types";
 
-const API_URL = "https://agrobusiness-api.onrender.com/users";
+const API_URL = "https://api-backend-1-0.onrender.com/users";
 
 const fetchAPI = async <T>(
   url: string,
