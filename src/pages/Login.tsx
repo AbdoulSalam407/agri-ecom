@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import type { User } from "../types";
 
 interface LocationState {
   from?: {
@@ -91,42 +90,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const testAccounts: (User & { farmName?: string })[] = [
-    {
-      id: "1",
-      name: "Admin AgriEcom",
-      email: "admin@agriecom.com",
-      password: "admin123",
-      role: "admin" as User["role"],
-      phone: "+33 1 23 45 67 89",
-      address: "123 Rue de l'Agriculture, Paris",
-      blocked: false,
-      createdAt: "2024-01-01T00:00:00.000Z",
-    },
-    {
-      id: "2",
-      name: "Jean Producteur",
-      email: "jean@ferme.com",
-      password: "producteur123",
-      role: "producer" as User["role"],
-      phone: "+33 6 12 34 56 78",
-      address: "456 Chemin de la Ferme, Lyon",
-      blocked: false,
-      createdAt: "2024-02-01T00:00:00.000Z",
-      farmName: "Ferme du Soleil",
-    },
-  ];
-
-  const fillTestAccount = (account: User): void => {
-    setEmail(account.email);
-    setPassword(account.password);
-    setError("");
-    setMessage({
-      type: "info",
-      text: `Compte ${account.role} pré-rempli - Cliquez sur "Se connecter"`,
-    });
-  };
-
   const togglePasswordVisibility = (): void => {
     setShowPassword(!showPassword);
   };
@@ -162,29 +125,34 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center p-3">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-4">
-        {/* En-tête ultra-compact */}
-        <div className="text-center mb-4">
-          <div className="flex items-center justify-center mb-2">
-            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-2">
-              <span className="text-white text-sm">🌾</span>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
+        {/* En-tête */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center mb-3">
+            <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-white text-lg">🌾</span>
             </div>
-            <h1 className="text-xl font-bold text-green-500">AgroBusiness</h1>
+            <h1 className="text-2xl font-bold text-green-600">AgroBusiness</h1>
           </div>
-          <h2 className="text-lg font-semibold text-gray-700">Se connecter</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Se connecter
+          </h2>
+          <p className="text-gray-600 text-sm">
+            Accédez à votre compte AgroBusiness
+          </p>
         </div>
 
-        {/* Messages d'alerte compacts */}
+        {/* Messages d'alerte */}
         {message.text && (
           <div
-            className={`mb-3 p-2 rounded border text-xs ${
+            className={`mb-4 p-3 rounded-lg border text-sm ${
               message.type === "success"
                 ? "bg-green-50 border-green-200 text-green-800"
                 : "bg-blue-50 border-blue-200 text-blue-800"
             }`}
           >
             <div className="flex items-center">
-              <span className="mr-1">
+              <span className="mr-2 text-lg">
                 {message.type === "success" ? "✅" : "ℹ️"}
               </span>
               <span>{message.text}</span>
@@ -193,132 +161,125 @@ const Login: React.FC = () => {
         )}
 
         {error && (
-          <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-xs">
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <span className="text-red-500 mr-1">❌</span>
+                <span className="text-red-500 mr-2 text-lg">❌</span>
                 <span className="text-red-700">{error}</span>
               </div>
-              <button onClick={clearForm} className="text-red-500 text-xs">
+              <button
+                onClick={clearForm}
+                className="text-red-500 hover:text-red-700 text-sm"
+              >
                 ✕
               </button>
             </div>
           </div>
         )}
 
-        {/* Comptes de test compacts */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-medium text-gray-600">
-              Accès rapide
-            </span>
-            <span className="text-xs text-gray-500">Cliquez</span>
-          </div>
-          <div className="flex gap-1">
-            {testAccounts.map((account) => (
-              <button
-                key={account.id}
-                type="button"
-                onClick={() => fillTestAccount(account)}
+        {/* Formulaire */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Adresse email
+            </label>
+            <div className="relative">
+              <input
+                type="email"
+                placeholder="votre@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
-                className="flex-1 p-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-gray-700 text-xs transition-colors"
+                required
+                className="w-full pl-10 pr-4 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">
+                📧
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mot de passe
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Votre mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                required
+                className="w-full pl-10 pr-10 py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">
+                🔒
+              </span>
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                disabled={loading}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg transition-colors"
               >
-                <div
-                  className={`w-2 h-2 rounded-full mx-auto mb-1 ${
-                    account.role === "admin" ? "bg-purple-500" : "bg-green-500"
-                  }`}
-                ></div>
-                <div>{account.role === "admin" ? "Admin" : "Prod"}</div>
+                {showPassword ? "🙈" : "👁️"}
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Formulaire compact */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="relative">
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              required
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500"
-            />
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-              📧
-            </span>
+            </div>
           </div>
 
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              required
-              className="w-full pl-9 pr-8 py-2 text-sm border border-gray-300 rounded-lg focus:border-green-500 focus:ring-1 focus:ring-green-500"
-            />
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-              🔒
-            </span>
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </button>
-          </div>
-
+          {/* Indicateur de formulaire rempli */}
           {email && password && (
-            <div className="p-2 bg-green-50 border border-green-200 rounded text-xs text-green-700 text-center">
-              ✅ Compte pré-rempli
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 text-center">
+              <div className="flex items-center justify-center">
+                <span className="mr-2">✅</span>
+                <span>Formulaire prêt - Cliquez sur "Se connecter"</span>
+              </div>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-2 px-4 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 px-6 rounded-lg font-semibold text-base transition-all duration-200 flex items-center justify-center gap-3 shadow-md hover:shadow-lg disabled:shadow-none"
           >
             {loading ? (
               <>
-                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Connexion...</span>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Connexion en cours...</span>
               </>
             ) : (
               <>
-                <span>🔑</span>
+                <span className="text-lg">🔑</span>
                 <span>Se connecter</span>
               </>
             )}
           </button>
         </form>
 
-        {/* Liens compacts */}
-        <div className="mt-4 text-center space-y-2">
-          <p className="text-gray-600 text-xs">
-            Nouveau ?{" "}
+        {/* Liens */}
+        <div className="mt-6 text-center space-y-3">
+          <p className="text-gray-600 text-sm">
+            Nouveau sur AgroBusiness ?{" "}
             <Link
               to="/register"
-              className="text-green-600 hover:text-green-700 font-semibold"
+              className="text-green-600 hover:text-green-700 font-semibold transition-colors"
             >
               Créer un compte
             </Link>
           </p>
-          <Link to="/" className="text-gray-500 hover:text-gray-700 text-xs">
+          <Link
+            to="/"
+            className="inline-block text-gray-500 hover:text-gray-700 text-sm transition-colors"
+          >
             ← Retour à l'accueil
           </Link>
         </div>
 
-        {/* Sécurité compacte */}
-        <div className="mt-3 p-2 bg-gray-100 rounded text-center">
-          <div className="flex items-center justify-center gap-1 text-gray-600 text-xs">
+        {/* Sécurité */}
+        <div className="mt-4 p-3 bg-gray-100 rounded-lg text-center">
+          <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
             <span>🛡️</span>
-            <span>Connexion sécurisée</span>
+            <span>Connexion sécurisée et chiffrée</span>
           </div>
         </div>
       </div>

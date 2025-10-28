@@ -1,7 +1,7 @@
 // services/adminService.ts
 import type { Stats } from "../types";
 
-const API_URL = "https://api-backend-1-0.onrender.com/";
+const API_URL = "https://api-backend-1-0.onrender.com";
 
 export const adminService = {
   getAdminStats: async (): Promise<Stats> => {
